@@ -1,8 +1,8 @@
 {
-  "name": "react-starter-kit",
+  "name": "react-hayun",
   "version": "1.0.0",
-  "description": "this is react start kit",
-  "author": "bevelery <zhengaojin@live.cn> (http://blog.csdn.net/beverley__)",
+  "description": "this is react env",
+  "author": "tab",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dll": "cross-env NODE_ENV=production webpack -p --config webpack.dll.config.js",
