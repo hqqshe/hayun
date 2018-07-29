@@ -1,0 +1,9 @@
+.swipe {
+  overflow: hidden;
+  position: relative;
+  float: left;
+  width: 100%;
+}
+.swipe img {
+  width: 100%;
+}

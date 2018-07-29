@@ -1,0 +1,91 @@
+.Login_wrap {
+  width: 515px;
+  height: 400px;
+  text-align: center;
+}
+@media screen and (max-width: 768px) {
+  .Login_wrap {
+    width: 100%;
+    box-shadow: 0 0 0 0;
+  }
+}
+.Login_wrap .logo_wrap {
+  border-bottom: 1px solid #e2dbdb;
+  padding-bottom: 30px;
+}
+.Login_wrap .logo_wrap p {
+  margin-bottom: 0;
+}
+.Login_wrap .logo_wrap .info {
+  width: 220px;
+  margin: 0 auto;
+  line-height: 1;
+}
+.Login_wrap .logo_wrap .info img {
+  float: left;
+  margin: 5px 10px;
+}
+.Login_wrap .logo_wrap .info p {
+  float: left;
+}
+.Login_wrap .logo_wrap .info .name {
+  font-size: 22px;
+  color: #43b3f8;
+  letter-spacing: 6.2px;
+}
+.Login_wrap .logo_wrap .info .url {
+  font-size: 12px;
+  color: #43b3f8;
+  line-height: 1.5;
+}
+.Login_wrap .logo_wrap .info .des {
+  font-size: 12px;
+  letter-spacing: 1.3px;
+}
+.Login_wrap .form {
+  margin-top: 20px;
+}
+.Login_wrap .form > .font {
+  font-size: 80px;
+  color: #495060;
+}
+.Login_wrap .form > .ant-form {
+  width: 80%;
+  margin: 0 auto;
+}
+.Login_wrap .form > .ant-form .font {
+  font-size: 12px;
+  font-weight: 800;
+}
+.Login_wrap .form > .ant-form .ant-btn-primary {
+  width: 100%;
+  background-color: #495060;
+  border-color: #495060;
+}
+.Login_wrap .form > .ant-form .ant-btn-primary:hover {
+  opacity: .95;
+}
+.Login_wrap .form > .ant-form .ant-btn-clicked:after {
+  border: 0 solid #495060;
+}
+.Login_wrap .form > .ant-form .ant-btn-loading:before {
+  display: none;
+}
+.Login_wrap .form .wechat {
+  font-size: 16px;
+  color: #51c332;
+  cursor: pointer;
+}
+.Login_wrap .wx_wrap .frame {
+  margin: 0 auto;
+}
+.Login_wrap .wx_wrap .cover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #000;
+  opacity: .5;
+  height: 100%;
+  display: none;
+}

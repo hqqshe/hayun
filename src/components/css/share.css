@@ -1,0 +1,54 @@
+.share_wrap {
+  position: fixed;
+  top: -11111111px;
+  background-image: url(../assets/card1.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 640px;
+  height: 1136px;
+  text-align: center;
+  line-height: 1.5;
+}
+.share_wrap .head {
+  border-radius: 100%;
+  margin-top: 210px;
+  width: 66px;
+}
+.share_wrap .name {
+  font-size: 23px;
+  color: #f2dd93;
+  margin-top: 10px;
+}
+.share_wrap .des {
+  font-size: 18px;
+  border-bottom: 1px solid #f2dd93;
+  width: 266px;
+  margin: 0 auto;
+  line-height: 50px;
+}
+.share_wrap .title {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 50px auto;
+  width: 300px;
+}
+.share_wrap .date {
+  font-size: 24px;
+}
+.share_wrap .time {
+  font-size: 24px;
+  font-weight: bold;
+}
+.share_wrap .qcode {
+  width: 200px;
+  margin: 50px auto 0 auto;
+}
+.share_wrap .qcode img {
+  width: 100%;
+}
+.share_wrap .tip {
+  font-size: 16px;
+}
+.photo img {
+  width: 100%;
+}
