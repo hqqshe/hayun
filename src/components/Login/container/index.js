@@ -68,15 +68,16 @@ class Login extends Component {
             }
         });
     }
+     //获取url参数
+     GetQueryString = (name)=> { 
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i"); 
+        var r = this.state.search.substr(1).match(reg); 
+        if (r!=null) return (r[2]); return null; 
+    }
     componentDidMount = () => {
-        if(this.state.search!=null&&this.state.search!=''){
-            var parm=this.state.search.split('?')[1].split('=')[1];
-            this.setState({
-                code:parm
-            },()=>{
-                console.log(parm)
-                this.loginWx(parm);
-            })
+        let code=this.GetQueryString('code');
+        if(code){
+            this.loginWx({code:code});
         }
     }
     componentWillUnmount() {
@@ -84,7 +85,7 @@ class Login extends Component {
     }
     handleShowWechat(){
         if (navigator.userAgent.toLowerCase().indexOf('micromessenger') > -1 || typeof navigator.wxuserAgent !== 'undefined') {
-            var wxUrl='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx7e40bbc315ec325d&redirect_uri=https://www.hayun100.com/wechat/index.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
+            var wxUrl='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx7e40bbc315ec325d&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html%23%2flogin&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
             this.props.router.push(wxUrl)
         }
         this.setState({showWechat:!this.state.showWechat});
@@ -94,9 +95,12 @@ class Login extends Component {
         GET('/wechat/oauth2user',{
             code:key
         }).then(res => {
-            console.log(res)
-            // this.updateName(userName)
-            // this.props.history.push('/home')
+            if(res.code=='000000'){
+                res.data.account.vip=res.data.vip
+                this.updateName(res.data.account)
+                this.props.history.push('/')
+                // Cookies.set(res.session.name, res.session.value, { expires: 1, path: '/' });
+            }
         });
     }
     render() {
