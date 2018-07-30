@@ -1,4 +1,5 @@
-import "../../normalize"
+import "../../normalize";
+import 'url-search-params-polyfill';
 /**
  * 将对象转成 a=1&b=2的形式
  * @param obj 对象
@@ -17,11 +18,11 @@ function obj2String(obj, arr = [], idx = 0) {
    * @param method 请求方式
    */
   function commonFetch(url, options, method = 'GET') {
-    const searchStr = obj2String(options)
+    const searchStr =new URLSearchParams(options);
+    console.log(searchStr)
     let initObj = {}
     if (method === 'GET') { // 如果是GET请求，拼接url
       url += '?' + searchStr;
-      
       initObj = {
         method: method,
         credentials: 'include',
@@ -44,6 +45,7 @@ function obj2String(obj, arr = [], idx = 0) {
       }
     }
     return fetch(url, initObj).then(function(response) {
+      console.log(JSON.stringify(response)+"--------fetch------")
       return response&&response.json();
     });
     // fetch(url, initObj).then((res) => {

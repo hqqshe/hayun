@@ -2,12 +2,10 @@ import React, { Component } from 'react'
 import { Provider, inject, observer } from 'mobx-react'
 import store from '../store'
 import { message,Form,Icon } from 'antd'
-import CryptoJS from 'crypto-js'
 import FormBox from '../components/FormBox'
-import Cookies from 'js-cookie'
 import Wxlogin from '../components/Wxlogin'
 import logo from '../../assets/logo.png'
-import {GET} from '../../fetch/myfetch';
+import {GET,POST} from '../../fetch/myfetch';
 const FormItem = Form.Item;
 import './index.less'
 
@@ -19,8 +17,6 @@ class Login extends Component {
         this.store = new store() // 在这里实例化，保证每次加载组件数据的初始化。
         this.state = {
             showWechat:false,
-            code:'',
-            search:props.location.search,
         }
     }
     updateLoading = (boolean) => {
@@ -30,79 +26,46 @@ class Login extends Component {
         this.props.user = user
     }
     /**
-   * 初始化获取数据
-   * @param  {string} key 搜索关键字
-   */
-    inputLogin = key => {
-        GET('/wechat/login',key).then(res => {
-            console.log(res.data.vip.expireDate)
+     * 手动登录
+     */
+    inputLogin = (key,form) => {
+        POST('/wechat/login',key).then(res => {
+            console.log(res)
             if(res.code=='000000'){
                 res.data.account.vip=res.data.vip
                 this.updateName(res.data.account)
                 this.props.history.push('/')
                 // Cookies.set(res.session.name, res.session.value, { expires: 1, path: '/' });
+            }else{
+                form.setFields({
+                    password: {
+                      value: '',
+                      errors: [new Error('账号或密码错误')],
+                    },
+                  });
             }
+            this.updateLoading(false);
         });
     }
     submit = (form, updateLoading) => {
         form.validateFields((err, values) => {
             if (!err) {
                 this.updateLoading(true)
-                this.timer = setTimeout(() => {
-                    this.updateLoading(false)
-                    let { userName, password } = values
-                    this.inputLogin({userName,password})
-
-                    // if (userName == 'admin' && password == '123456') {
-                    //     let message = `M&${userName}&${password}`
-                    //     let key = 'react_starter'
-                    //     let session = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA1(message, key))
-                    //     Cookies.set('JSESSIONID', session, { expires: 1, path: '/' });
-                    //     Cookies.set('userName', userName, { expires: 1, path: '/' });
-                    //     this.updateName(userName)
-                    //     this.props.history.push('/home')
-                    // } else {
-                    //     message.error('账号：admin ； 密码：123456')
-                    // }
-                }, 100)
+                this.inputLogin(values,form)
+               
             }
         });
     }
-     //获取url参数
-     GetQueryString = (name)=> { 
-        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i"); 
-        var r = this.state.search.substr(1).match(reg); 
-        if (r!=null) return (r[2]); return null; 
-    }
-    componentDidMount = () => {
-        let code=this.GetQueryString('code');
-        if(code){
-            this.loginWx({code:code});
-        }
-    }
-    componentWillUnmount() {
-        clearTimeout(this.timer);
-    }
+
     handleShowWechat(){
         if (navigator.userAgent.toLowerCase().indexOf('micromessenger') > -1 || typeof navigator.wxuserAgent !== 'undefined') {
-            var wxUrl='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx7e40bbc315ec325d&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html%23%2flogin&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
+            var wxUrl='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html%23%2flogin&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
             this.props.router.push(wxUrl)
+        }else{
+            this.setState({showWechat:!this.state.showWechat});
         }
-        this.setState({showWechat:!this.state.showWechat});
     }
-    loginWx = key => {
-        console.log("wxLogin------"+key)
-        GET('/wechat/oauth2user',{
-            code:key
-        }).then(res => {
-            if(res.code=='000000'){
-                res.data.account.vip=res.data.vip
-                this.updateName(res.data.account)
-                this.props.history.push('/')
-                // Cookies.set(res.session.name, res.session.value, { expires: 1, path: '/' });
-            }
-        });
-    }
+    
     render() {
         return (
                 <Provider store={this.store}>
@@ -121,7 +84,7 @@ class Login extends Component {
                     <div id='wx_wrap' className='wx_wrap' style={{display:this.state.showWechat?"block":"none"}}>
                         <div className="cover"></div>
                         <div className='frame'>
-                            <Wxlogin/>
+                            {/* <Wxlogin/> */}
                         </div>
                     </div>
                 </div>

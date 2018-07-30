@@ -12,21 +12,41 @@ import User from '../components/User';
 import UserInfo from '../components/UserInfo';
 import BindPhone from '../components/BindPhone';
 import Video from '../components/Video';
-import {GET} from '../components/fetch/myfetch';
+import {POST} from '../components/fetch/myfetch';
 import Cookies from 'js-cookie';
 
 @withRouter
 class Routers extends Component {
     constructor(props){
         super(props)
-        this.pathname = this.props.location.pathname
+        this.pathname = this.props.location.pathname;
+        this.search = this.props.location.search;
     }
     
+    //获取url参数
+    GetQueryString = (name)=> { 
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i"); 
+        var r = this.props.search.substr(1).match(reg); 
+        if (r!=null) return (r[2]); return null; 
+    }
     componentDidMount = () => {
-        //this.initWeConfig();
+        
+    }
+    loginWx = key => {
+        console.log("wxLogin------"+key)
+        POST('/wechat/oauth2user',{
+            code:key
+        }).then(res => {
+            if(res.code=='000000'){
+                res.data.account.vip=res.data.vip
+                this.updateName(res.data.account)
+                this.props.history.push('/')
+                // Cookies.set(res.session.name, res.session.value, { expires: 1, path: '/' });
+            }
+        });
     }
     loginSession = key => {
-        GET('/wechat/loginSession',{
+        POST('/wechat/loginSession',{
             loginSession:key
         }).then(res => {
             if(res.code=='000000'){
@@ -40,14 +60,18 @@ class Routers extends Component {
         });
     }
     componentWillMount(){
-        let session=Cookies.get('hl_p_c_s_t')
-        if (session) {
-            if(store.userInfo.userName==''){
-                this.loginSession(session);
-            }
-        }else{
-            this.props.history.replace('/login')
+        let code=this.GetQueryString('code');
+        if(code){
+            this.loginWx({code:code});
         }
+        // let session=Cookies.get('hl_p_c_s_t')
+        // if (session) {
+        //     if(store.userInfo.userName==''){
+        //         this.loginSession(session);
+        //     }
+        // }else{
+        //     this.props.history.replace('/login')
+        // }
     }
     //微信jssdk配置
     initWeConfig = key => {
