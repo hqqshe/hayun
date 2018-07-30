@@ -20,13 +20,14 @@ class Routers extends Component {
     constructor(props){
         super(props)
         this.pathname = this.props.location.pathname;
-        this.search = this.props.location.search;
     }
     
     //获取url参数
-    GetQueryString = (name)=> { 
-        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i"); 
-        var r = this.props.search.substr(1).match(reg); 
+    GetQueryString = (name)=> {
+        let search=window.location.search;
+        if(search.length<1) return null;
+        let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i"); 
+        let r = search.substr(1).match(reg); 
         if (r!=null) return (r[2]); return null; 
     }
     componentDidMount = () => {
@@ -42,6 +43,8 @@ class Routers extends Component {
                 this.updateName(res.data.account)
                 this.props.history.push('/')
                 // Cookies.set(res.session.name, res.session.value, { expires: 1, path: '/' });
+            }else{
+                this.props.history.push('/bind')
             }
         });
     }

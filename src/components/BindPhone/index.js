@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import MenuSwitch from '../Menu/MenuSwitch'
 import { Form, Input, Button } from 'antd';
+import {GET,POST} from '../fetch/myfetch';
+
 const FormItem = Form.Item;
 const Search = Input.Search;
 
