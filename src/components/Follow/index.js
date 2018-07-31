@@ -1,9 +1,11 @@
 import React from 'react'
 
 class Follow extends React.Component{
-    
+    constructor(props){
+        super(props)
+    }
     handClick = () =>{
-        this.props.handFollow;
+        this.props.handFollow();
     }
     render() {
         return (

@@ -28,7 +28,7 @@ class BackTop extends React.Component {
     render() {
         return (
             <a id="top_view" onClick={this.scrollToTop} >
-            <span className='teach'></span>
+            <span className='top'></span>
                 <p>顶部</p>
             </a>
         );

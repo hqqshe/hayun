@@ -13,16 +13,18 @@ import { observable, action } from 'mobx'
 
 class Store {
     @observable userInfo = {
-        userName : '',
+        name : '',
         accountName : '',
         headUrl : '',
         id : '',
         role : '',
         sessionId : '',
         vip:''
-    }
-    @observable loading = false
-    @observable ticket = ''
+    };
+    @observable loading = false;
+    @observable ticket = '';
+    @observable inwx = false;
+
     @action updateName = (res) => {
         this.userInfo.name = res.userName
         this.userInfo.accountName = res.accountName
@@ -37,6 +39,9 @@ class Store {
     }
     @action updateTicket = (from) => {
         this.ticket = from
+    }
+    @action updateInwx = (boolean) => {
+        this.inwx = boolean
     }
 }
 

@@ -1,13 +1,14 @@
-import React, { Component } from 'react'
-import { Provider, inject, observer } from 'mobx-react'
-import store from '../store'
-import { message,Form,Icon } from 'antd'
-import FormBox from '../components/FormBox'
-import Wxlogin from '../components/Wxlogin'
-import logo from '../../assets/logo.png'
+import React, { Component } from 'react';
+import { Provider, inject, observer } from 'mobx-react';
+import store from '../store';
+import { Form } from 'antd';
+import FormBox from '../components/FormBox';
+import Wxlogin from '../components/Wxlogin';
+import logo from '../../assets/logo.png';
 import {GET,POST} from '../../fetch/myfetch';
+import './index.less';
+
 const FormItem = Form.Item;
-import './index.less'
 
 @inject('Store')
 @observer
@@ -22,18 +23,15 @@ class Login extends Component {
     updateLoading = (boolean) => {
         this.props.loading = boolean
     }
-    updateName = (user) => {
-        this.props.user = user
-    }
+    
     /**
      * 手动登录
      */
     inputLogin = (key,form) => {
         POST('/wechat/login',key).then(res => {
-            console.log(res)
             if(res.code=='000000'){
                 res.data.account.vip=res.data.vip
-                this.updateName(res.data.account)
+                this.props.Store.updateName(res.data.account)
                 this.props.history.push('/')
                 // Cookies.set(res.session.name, res.session.value, { expires: 1, path: '/' });
             }else{
@@ -56,9 +54,9 @@ class Login extends Component {
             }
         });
     }
-
+ 
     handleShowWechat(){
-        if (navigator.userAgent.toLowerCase().indexOf('micromessenger') > -1 || typeof navigator.wxuserAgent !== 'undefined') {
+        if (this.props.Store.inwx) {
             var wxUrl='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html%23%2flogin&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
             this.props.router.push(wxUrl)
         }else{
@@ -84,7 +82,7 @@ class Login extends Component {
                     <div id='wx_wrap' className='wx_wrap' style={{display:this.state.showWechat?"block":"none"}}>
                         <div className="cover"></div>
                         <div className='frame'>
-                            {/* <Wxlogin/> */}
+                        {!this.props.Store.inwx?<Wxlogin/>:''}
                         </div>
                     </div>
                 </div>

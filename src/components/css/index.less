@@ -90,6 +90,7 @@
             flex: 1;
             text-align: center;
             color: #333;
+            p{margin-top: 5px;}
             span{
                 display: inline-block;
                 width: 3rem;
@@ -106,6 +107,15 @@
             }
             .video{
                 background-image: url(../assets/video.png)
+            }
+            .top{
+                background-image: url(../assets/top.png)
+            }
+            .serie{
+                background-image: url(../assets/serie.png)
+            }
+            .home{
+                background-image: url(../assets/home.png)
             }
             .my{
                 background-image: url(../assets/my.png)
@@ -333,19 +343,25 @@
         .follow{
             float: right;
             border-radius: 20px;
-            background-color: #fe5008;
-            background: -webkit-linear-gradient(#fe5008, #feb608); /* Safari 5.1 - 6.0 */
-            background: -o-linear-gradient(#fe5008, #feb608); /* Opera 11.1 - 12.0 */
-            background: -moz-linear-gradient(#fe5008, #feb608); /* Firefox 3.6 - 15 */
-            background: linear-gradient(#fe5008, #feb608); /* 标准的语法 */
-            line-height: 2rem;
+            background-color: #ff6502;
+            // background: -webkit-linear-gradient(#fe5008, #feb608); /* Safari 5.1 - 6.0 */
+            // background: -o-linear-gradient(#fe5008, #feb608); /* Opera 11.1 - 12.0 */
+            // background: -moz-linear-gradient(#fe5008, #feb608); /* Firefox 3.6 - 15 */
+            // background: linear-gradient(#fe5008, #feb608); /* 标准的语法 */
+            line-height: 1.8rem;
             margin: 0.25rem;
             padding: 0 1rem;
             color: #fff;
+            border:1px solid #ff6502;
             .icon{
                 margin-right: 5px
             }
             .txt{font-size: @basesize}
+            &.ed{
+                background-color: #f5f5f5;
+                color:#666;
+                border-color:#e5e5e5;
+            }
         }
     }
     .tab_wrap{
@@ -391,7 +407,7 @@
         }
         .des{
             font-size: @basesize;
-            padding-top: @basesize;
+            padding: @basesize 0;
         }
     }
     .item_lesson{

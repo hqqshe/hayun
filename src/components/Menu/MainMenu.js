@@ -15,6 +15,13 @@ class MainMenu extends React.Component {
         </Link>
         <Link to={{
               pathname: '/category',
+              search: '?type=serie'
+            }}>
+          <span className='serie'></span>
+          <p>系列课程</p>
+        </Link>
+        <Link to={{
+              pathname: '/category',
               search: '?type=lecturer'
             }}>
           <span className='teach'></span>
@@ -27,13 +34,7 @@ class MainMenu extends React.Component {
           <span className='video'></span>
           <p>精选视频</p>
         </Link>
-        <Link to={{
-              pathname: '/category',
-              search: '?type=video'
-            }}>
-          <span className='my'></span>
-          <p>个人中心</p>
-        </Link>
+        
       </div>
     );
   }

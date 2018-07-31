@@ -2,10 +2,13 @@ import React, { Component } from 'react';
 import MenuSwitch from '../Menu/MenuSwitch'
 import { Form, Input, Button } from 'antd';
 import {GET,POST} from '../fetch/myfetch';
+import { inject, observer } from 'mobx-react';
 
 const FormItem = Form.Item;
 const Search = Input.Search;
 
+@inject('Store')
+@observer
 class BindPhone extends Component{
     constructor(){
         super();
@@ -38,6 +41,9 @@ class BindPhone extends Component{
             code:c
         }).then(res => {
             console.log(res)
+            res.data.account.vip=res.data.vip
+            this.props.Store.updateName(res.data.account)
+            this.props.history.push('/')
         });
     }
 

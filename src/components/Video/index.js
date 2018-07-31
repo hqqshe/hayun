@@ -1,9 +1,4 @@
 import React, { Component } from 'react';
-import Follow from '../Follow/Follow';
-import SeriesBuy from './components/SeriesBuy'
-import { Link } from 'react-router-dom';
-import Tab from './components/Tab';
-import ItemLesson from '../Items/ItemLesson';
 import Footer from '../Footer/Footer';
 import MenuSwitch from '../Menu/MenuSwitch';
 import {GET} from '../fetch/myfetch';
@@ -48,7 +43,7 @@ class Video extends Component {
         });
     }
     //支付
-    buy = key => {
+    handleBuy = key => {
         console.log(key)
         let evetype=1;
         var ua = window.navigator.userAgent; 
@@ -84,8 +79,31 @@ class Video extends Component {
                 }
                 if(evetype=1){
                     console.log(res)
-                    //显示二维码
-                    //不停的回调
+                    if(res.data.paywayId == 1){// 微信支付二维码
+                        $(".pay-content-list").fadeIn().find(".qrcode").empty().qrcode({text:res.data.payUrl,render:"image",ecLevel:"M"});
+                        //pay_btn.off('click');
+                        $timer = window.setInterval(reqpay,5000); 
+                        function reqpay(){
+                            $.ajax({
+                                url: ctx+'/payst',
+                                method: 'POST',
+                                data: {'orderId': orderId},
+                                success:function(res) {			
+                                    if (res=='true'){
+                                        window.clearInterval($timer)
+                                        payResult.slideDown().siblings().hide();
+                                        edition?payResult.find('.sucess').fadeIn().find('.myCourse').attr('href',jumpUrl).prev().show()
+                                               :payResult.find('.sucess').fadeIn().find('.myCourse').attr('href',jumpUrl);
+                                        $timer = window.setInterval(function(){
+                                            window.location = jumpUrl;
+                                        },8000); 
+                                    }else{
+                                        console.log(res);
+                                    }
+                                }
+                            });
+                        }
+                     }
                 }else  if(evetype=2){
                     //微信外 跳转呼出微信支付
                     window.location.href=encodeURI(res.data.result.mweb_url);
@@ -143,12 +161,12 @@ class Video extends Component {
         });
     }
 
-    handleClick = (id,videoId)=> { 
-        console.log(id+"---"+videoId+'----------'+JSON.stringify(this.props.history))
-        let url='https://www.hayun100.com/player/play/'+id;
-        if(videoId) url=url+'?videoId='+videoId;
-        
-        //window.location.href=url
+    //播放某个视频
+    handlePlay = (id,videoId)=> { 
+        let redirect='//www.hayun100.com/player/play/'+id;
+        //let redirect = window.location.origin + '/player/play/'+id
+        if(videoId) redirect=redirect+'?videoId='+videoId;
+        window.open(redirect);  
     }
     //加载更多
     handleMore = (e) => {
@@ -160,32 +178,30 @@ class Video extends Component {
     }
     render() {
         const pkg=this.state.videoPkg;
-        console.log(this.props.Store.userInfo.vip)
+        //console.log(this.props.location)
         return (
             <div className='Layouts_wrap clear clearFix'>
                 <img style={{width:'100%'}} src={pkg.photo} alt={pkg.name}/>
-                <div className='share_btn'>
-                    {/* <Link to={{
+                {/* <div className='share_btn'>
+                    <Link to={{
                     pathname: '/share',
                     search: '?lid='+this.state.lct.id+'?cid='+this.state.room.id
-                    }}></Link> */}
-                 </div>
-                 <div className='buy_wrap wrap_padding video'>
-                 <div className="info ">
-                    <p className="title">{pkg.name}</p>
-                    <p className="des">类型:{pkg.category} | 共:{pkg.count}个视频 | 年级:{pkg.grade} | 科目:{pkg.subName}</p>
-                    <p className="des"></p>
-                    <div className="price_info">
-                        <span className="old rmb">{pkg.oldPrice/100}</span>
-                        <span className="rmb">{pkg.newPrice/100}</span>
+                    }}></Link>
+                 </div> */}
+                <div className='buy_wrap wrap_padding video'>
+                <div className="info ">
+                   <p className="title">{pkg.name}</p>
+                   <p className="des">类型:{pkg.category} | 共:{pkg.count}个视频 | 年级:{pkg.grade} | 科目:{pkg.subName}</p>
+                   <p className="des"></p>
+                   <div className="price_info">
+                       <span className="old rmb">{pkg.oldPrice/100}</span>
+                       <span className="rmb">{pkg.newPrice/100}</span>
                     </div>
                 </div>
-                {/* href='https://www.hayun100.com/order/vpkgdisc/{pkg.id}'
-                href='${ctx}/player/play/{pkg.id}' */}
                 <div className='buy'>
                 {this.props.Store.userInfo.vip>new Date().getTime()||pkg.boughted
-                    ?<a href="javascript:void(0);" className="buy_btn play" onClick={this.handleClick.bind(this,pkg.id)}>立即学习</a>
-                    :<a href="javascript:void(0);" className="buy_btn" onClick={this.buy.bind(this,pkg.id)}>立即购买</a>
+                    ?<a href="javascript:void(0);" className="buy_btn play" onClick={this.handlePlay.bind(this,pkg.id)}>立即学习</a>
+                    :<a href="javascript:void(0);" className="buy_btn" onClick={this.handleBuy.bind(this,pkg.id)}>立即购买</a>
                 }
                 </div>
             </div>
@@ -209,7 +225,7 @@ class Video extends Component {
                                         </div>
                                         {this.props.Store.userInfo.vip>new Date().getTime()||pkg.boughted||k.amountLong==0||k.boughted
                                             ?<div className="buy_info clearfix">
-                                                <a href="javascript:void(0);" className="buy_btn play" onClick={this.handleClick.bind(this,pkg.id,k.goosId)}>播放</a>
+                                                <a href="javascript:void(0);" className="buy_btn play" onClick={this.handlePlay.bind(this,pkg.id,k.goosId)}>播放</a>
                                             </div>
                                             :''
                                         }

@@ -31,7 +31,10 @@ class Routers extends Component {
         if (r!=null) return (r[2]); return null; 
     }
     componentDidMount = () => {
-        
+        //设置全局微信环境
+        if (navigator.userAgent.toLowerCase().indexOf('micromessenger') > -1 || typeof navigator.wxuserAgent !== 'undefined') {
+            store.updateInwx(true)
+        }
     }
     loginWx = key => {
         console.log("wxLogin------"+key)
@@ -40,7 +43,7 @@ class Routers extends Component {
         }).then(res => {
             if(res.code=='000000'){
                 res.data.account.vip=res.data.vip
-                this.updateName(res.data.account)
+                store.updateName(res.data.account)
                 this.props.history.push('/')
                 // Cookies.set(res.session.name, res.session.value, { expires: 1, path: '/' });
             }else{
@@ -55,10 +58,14 @@ class Routers extends Component {
             if(res.code=='000000'){
                 res.data.account.vip=res.data.vip
                 store.updateName(res.data.account);
-                console.log(JSON.stringify(store))
             }else{
-                Cookies.set('hl_p_c_s_t','');
-                this.props.history.replace('/login')
+                Cookies.remove('hl_p_c_s_t','');
+                if (store.inwx) {
+                    let redirect='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
+                    this.props.router.push(redirect)
+                }else{
+                    this.props.history.replace('/login')
+                }
             }
         });
     }
@@ -66,15 +73,16 @@ class Routers extends Component {
         let code=this.GetQueryString('code');
         if(code){
             this.loginWx({code:code});
+        }else{
+            let session=Cookies.get('hl_p_c_s_t')
+            if (session) {
+                if(store.userInfo.sessionId==''){
+                    this.loginSession(session);
+                }
+            }else{
+                this.props.history.replace('/login')
+            }
         }
-        // let session=Cookies.get('hl_p_c_s_t')
-        // if (session) {
-        //     if(store.userInfo.userName==''){
-        //         this.loginSession(session);
-        //     }
-        // }else{
-        //     this.props.history.replace('/login')
-        // }
     }
     //微信jssdk配置
     initWeConfig = key => {

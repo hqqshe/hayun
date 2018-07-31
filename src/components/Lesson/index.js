@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import Follow from '../Follow/Follow';
+import Follow from '../Follow';
 import SeriesBuy from './components/SeriesBuy'
 import { Link } from 'react-router-dom';
 import Tab from './components/Tab';
 import ItemLesson from '../Items/ItemLesson';
 import Footer from '../Footer/Footer';
 import MenuSwitch from '../Menu/MenuSwitch';
-import {GET} from '../fetch/myfetch';
+import {GET,POST} from '../fetch/myfetch';
 import { observer, inject } from 'mobx-react'
 import '../css/index.less'
 
@@ -132,18 +132,29 @@ class Lesson extends Component {
 
     handFollow =() =>{
         //todo 检查登录
-        POST('/customer/follow',{
-            target:this.state.lct.id,
-            relType:1,          
-        }).then(res => {
-            if(res == true){
-                let data = Object.assign({}, this.state.lct, { relType: 1 })
-                this.setState.lct({
-                    lct:data
-                })
+        let session=this.props.Store.userInfo.sessionId;
+        if(!session){
+            if (this.props.Store.inwx) {
+                let redirect='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
+                this.props.router.push(redirect)
+            }else{
+                this.props.history.replace('/login')
             }
-        });
+        }else{
+            POST('/customer/follow',{
+                target:this.state.lct.id,
+                relType:1,          
+            }).then(res => {
+                if(res == true){
+                    let data = Object.assign({}, this.state.lct, { relType: 1 })
+                    this.setState.lct({
+                        lct:data
+                    })
+                }
+            });
+        }
     }
+
     handClick =(value) =>{
         console.log('----ItemLesson--handClick---')
         this.setState({switch:value})
@@ -175,48 +186,46 @@ class Lesson extends Component {
         const reg = /<[^>]*>|<\/[^>]*>|&nbsp;/gm;
         let des = this.state.room.lctDes?this.state.lct.lctDes.replace(reg,''):'暂无简介';
         console.log('-----this.state.boughts-----'+JSON.stringify(this.state.boughts))
-        if(this.state.list.length>0){
-            return (
-                <div className='Layouts_wrap clear clearFix'>
-                    <img style={{width:'100%'}} src={this.state.room.photo} alt={this.state.room.title}/>
-                    <div className='share_btn'>
-                        <Link to={{
-                        pathname: '/share',
-                        search: '?lid='+this.state.lct.id+'?cid='+this.state.room.id
-                        }}></Link>
-                    </div>
-                    <Follow lct={this.state.lct} handFollow={this.handFollow}/>
-                    <SeriesBuy num={this.state.list.length} buy={this.buy} room={this.state.room} />
-                    <Tab handClick={this.handClick}/>
-                    <div className="teach_info">
-                        <div style={{display:this.state.switch?'block':'none'}}>
-                            {this.state.list.length>0
-                                ?<div>
-                                <p className="type">课程</p>
-                                <div className="class clearfix">
-                                {
-                                    this.state.list.map((k) => {
-                                        return ( 
-                                        <ItemLesson buy={this.buy} isSeries={this.state.room.classType=='系列课'} item={k} boughts={this.state.boughts}/>
-                                        )
-                                    })
-                                }
-                                </div></div>
-                                :''
-                            }
-                        </div>
-                        <div style={{display:this.state.switch?'none':'block'}}>
-                            <p className="type">简介</p>
-                            <div className="des">
-                                {des}
-                            </div>
-                        </div>
-                    </div>
-                    <Footer />
-                    <MenuSwitch />
+        return (
+            <div className='Layouts_wrap clear clearFix'>
+                <img style={{width:'100%'}} src={this.state.room.photo} alt={this.state.room.title}/>
+                <div className='share_btn'>
+                    <Link to={{
+                    pathname: '/share',
+                    search: '?lid='+this.state.lct.id+'?cid='+this.state.room.id
+                    }}></Link>
                 </div>
-            )
-        }else{return '';}
+                <Follow lct={this.state.lct} handFollow={this.handFollow}/>
+                <SeriesBuy num={this.state.list.length} buy={this.buy} room={this.state.room} />
+                <Tab handClick={this.handClick}/>
+                <div className="teach_info">
+                    <div style={{display:this.state.switch?'block':'none'}}>
+                        {this.state.list.length>0
+                            ?<div>
+                            <p className="type">课程</p>
+                            <div className="class clearfix">
+                            {
+                                this.state.list.map((k) => {
+                                    return ( 
+                                    <ItemLesson buy={this.buy} isSeries={this.state.room.classType=='系列课'} item={k} boughts={this.state.boughts}/>
+                                    )
+                                })
+                            }
+                            </div></div>
+                            :''
+                        }
+                    </div>
+                    <div style={{display:this.state.switch?'none':'block'}}>
+                        <p className="type">简介</p>
+                        <div className="des">
+                            {des}
+                        </div>
+                    </div>
+                </div>
+                <Footer />
+                <MenuSwitch />
+            </div>
+        )
     }
 }
 

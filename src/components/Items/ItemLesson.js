@@ -6,12 +6,11 @@ class ItemLesson extends React.Component{
         this.props.buy(this.props.item.goodsId);
     }
     render() {
-        var time=this.props.item.startTime.substring(0,this.props.item.startTime.length-3)
-
-        let bought=this.props.boughts.filter((k)=>{
+        let time=this.props.item.startTime.substring(0,this.props.item.startTime.length-3)
+        let bought=[];
+        this.props.boughts && this.props.boughts.filter((k)=>{
             return k==this.props.item.goodsId
         })
-        console.log(this.props.item.id+'------'+JSON.stringify(this.props.boughts))
         let buyInfo='';
         if(bought.length>0){
             buyInfo = <div className="buy_info clearfix">

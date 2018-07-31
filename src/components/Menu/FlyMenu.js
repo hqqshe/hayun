@@ -10,7 +10,7 @@ class FlyMenu extends React.Component {
         <Link to={{
               pathname: '/'
             }}>
-          <span className='live'></span>
+          <span className='home'></span>
           <p>首页</p>
         </Link>
         <BackTop/>

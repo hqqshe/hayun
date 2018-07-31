@@ -13,6 +13,7 @@ const proxy = require('http-proxy-middleware');
 //将服务器代理到localhost:8080端口上[本地服务器为localhost:3000]
 const apiProxy = proxy('/api', { target: 'http://localhost:9999',changeOrigin: true });
 const wechatProxy = proxy('/wechat', { target: 'http://localhost:9999',changeOrigin: true });
+const followProxy = proxy('/customer', { target: 'http://localhost:9999',changeOrigin: true });
 app.use(compress())
 
 const devMiddleware = webpackDevMiddleware(compiler, {
@@ -36,6 +37,7 @@ app.use(devMiddleware)
 app.use(hotMiddleware)
 app.use('/api/*', apiProxy);//api子目录下的都是用代理
 app.use('/wechat/*', wechatProxy);
+app.use('/customer/*', followProxy);
 app.use(hotMiddleware)
 app.use(express.static(project.basePath))
 

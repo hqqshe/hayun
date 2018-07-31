@@ -3,6 +3,7 @@ import html2canvas from 'html2canvas';
 import {GET} from '../fetch/myfetch';
 import QRCode from 'qrcode.react';
 import { inject, observer } from 'mobx-react';
+import Cookies from 'js-cookie';
 import '../css/share.less';
 
 @inject('Store')
@@ -10,41 +11,52 @@ import '../css/share.less';
 export default class ShareCard extends Component {
   constructor(props){
     super(props)
+    this.user = this.props.Store.userInfo;
     this.state = {
       search:props.location.search,
-      token:'',
       url:'',
       head:'',
       body:'',
       room:{},
-      lct:{}
     }
-  }
-  getRoom = key => {
-    GET('/api/getRoom',{
-        cid:key            
-    }).then(res => {
-        if(res.code == '000000'){
-            this.setState({room:res.data.room},this.getQcode(key));
-        }
-    });
-  }
-  getLct = key => {
-    GET('/api/getLct',{
-        lctId:key
-    }).then(res => {
-        if(res.code == '000000'){
-          this.setHead(res.data.lct.headUrl);
-            this.setState({lct:res.data.lct});
-        }
-    });
   }
   componentDidMount = () => {
     var parm=this.state.search.split('?')
-    var lid=parm[1].split('=')[1];
     var cid=parm[2].split('=')[1];
-    //this.getLct(lid)
-    this.getRoom(cid)
+    this.getRoom(cid);
+    this.getQcode(cid)
+  }
+  getRoom = key => {
+    GET('/api/getRoom',{
+      cid:key            
+    }).then(res => {
+      if(res.code == '000000'){
+        this.setState({room:res.data.room});
+      }
+    });
+  }
+  getQcode = (key) =>{
+    this.setState({
+      url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='
+    });
+    // GET('/wechat/getQr',{
+    //   scene_id:key
+    // }).then(res => {
+    //   this.setState({
+    //     // url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='+JSON.parse(res).ticket
+    //     url:res.data.url
+    //   },this.convertImg);
+    // });
+  }
+  setHead = (url) => {
+    var img = new Image;
+    img.src = url+'?'+Math.random();
+    img.crossOrigin = "Anonymous";
+    img.onload=()=>{
+      this.setState({
+        head:this.getBase64Image(img)
+      },this.convertImg)
+    }
   }
   getBase64Image = (img) => {
     var canvas = document.createElement("canvas");
@@ -55,17 +67,6 @@ export default class ShareCard extends Component {
     var ext = img.src.substring(img.src.lastIndexOf(".")+1).toLowerCase();
     var dataURL = canvas.toDataURL("image/octet-stream");
     return dataURL;
-  }
-
-  setHead = (url) => {
-    var img = new Image;
-    img.src = url+'?'+Math.random();
-    img.crossOrigin = "Anonymous";
-    img.onload=()=>{
-      this.setState({
-        head:this.getBase64Image(img)
-      })
-    }
   }
   convertImg  = () =>{
     var opts =  {
@@ -91,42 +92,35 @@ export default class ShareCard extends Component {
       });
     }); 
   }
-  getQcode = (key) =>{
-    GET('/wechat/getQr',{
-      scene_id:key
-    }).then(res => {
-      this.setState({
-        // url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='+JSON.parse(res).ticket
-        url:res.data.url
-      },this.convertImg);
-    });
-  }
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log(this.props.Store.userInfo.headUrl +'--------'+ nextProps.Store.userInfo.headUrl);
+    //console.log(nextState);
+    return this.state.body == ''||this.state.head == ''||this.state.url == ''
+}
   
   render() {
-    let user =this.props.Store.userInfo
-    if(user.headUrl){
-      this.setHead(user.headUrl)
-      return (
-        <div className="Layouts_wrap hide">
-          <div id='card' className="share_wrap">
-            <img  className="head" src={this.state.head} alt={user.name}/>
-            <p className="name">{user.name}</p>
-            <p className="des">为你分享一门好课</p>
-            <p className="title">{this.state.room.title}</p>
-            <p className="date">开课时间</p>
-            <p className="time">2018年07月02日 12:12</p>
-            <div className="qcode">
-              <QRCode value={this.state.url} style=""/>
-            </div>
-            <p className="tip">长按识别二维码,参与课程</p>
-          </div>
-          <div className="photo">
-            <img src={this.state.body} alt=""/>
-          </div>
-        </div>
-      );
-    }else{
-      return '';
+    console.log('-------body----'+this.state.body+'-----user------'+this.user.headUrl);
+    if(this.user.headUrl){
+      this.setHead(this.user.headUrl)
     }
+    return (
+      <div className="Layouts_wrap hide">
+        <div id='card' className="share_wrap">
+          <img  className="head" src={this.state.head} alt={this.user.name}/>
+          <p className="name">{this.user.name}</p>
+          <p className="des">为你分享一门好课</p>
+          <p className="title">{this.state.room.title}</p>
+          <p className="date">开课时间</p>
+          <p className="time">2018年07月02日 12:12</p>
+          <div className="qcode">
+            <QRCode value={this.state.url} style=""/>
+          </div>
+          <p className="tip">长按识别二维码,参与课程</p>
+        </div>
+        <div className="photo">
+          <img src={this.state.body} alt=""/>
+        </div>
+      </div>
+    );
   }
 }
