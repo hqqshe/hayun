@@ -12,16 +12,47 @@ import User from '../components/User';
 import UserInfo from '../components/UserInfo';
 import BindPhone from '../components/BindPhone';
 import Video from '../components/Video';
-import {POST} from '../components/fetch/myfetch';
+import {GET} from '../components/fetch/myfetch';
 import Cookies from 'js-cookie';
 
 @withRouter
 class Routers extends Component {
     constructor(props){
         super(props)
-        this.pathname = this.props.location.pathname;
     }
-    
+    componentWillMount(){
+        //设置全局微信环境
+        if (navigator.userAgent.toLowerCase().indexOf('micromessenger') > -1 || typeof navigator.wxuserAgent !== 'undefined') {
+            store.updateInwx(true);
+        }
+        let session = Cookies.get('hl_p_c_s_t','');
+        let code=this.GetQueryString('code');
+        console.log('---------code=='+code+'---------sessionId----------=='+session)
+        if(code&&!session){
+            this.loginWx(code);
+        }else if(session){
+            this.loginSession(session);
+        }else{
+            this.props.history.push('/login')
+        }
+    }
+    loginWx = key => {
+        GET('/wechat/oauth2user',{
+            code:key
+        }).then(res => {
+            console.log(store.userInfo.sessionId+"------res------"+JSON.stringify(res))
+            if(res.code=='000000'){
+                res.data.account.vip=res.data.vip
+                store.updateName(res.data.account)
+                this.props.history.push('/')
+                // Cookies.set(res.session.name, res.session.value, { expires: 1, path: '/' });
+            }else if(res.code =='000001'){
+                this.props.history.push('/bind?openid='+res.data)
+            }else{
+
+            }
+        });
+    }
     //获取url参数
     GetQueryString = (name)=> {
         let search=window.location.search;
@@ -31,28 +62,11 @@ class Routers extends Component {
         if (r!=null) return (r[2]); return null; 
     }
     componentDidMount = () => {
-        //设置全局微信环境
-        if (navigator.userAgent.toLowerCase().indexOf('micromessenger') > -1 || typeof navigator.wxuserAgent !== 'undefined') {
-            store.updateInwx(true)
-        }
+        
     }
-    loginWx = key => {
-        console.log("wxLogin------"+key)
-        POST('/wechat/oauth2user',{
-            code:key
-        }).then(res => {
-            if(res.code=='000000'){
-                res.data.account.vip=res.data.vip
-                store.updateName(res.data.account)
-                this.props.history.push('/')
-                // Cookies.set(res.session.name, res.session.value, { expires: 1, path: '/' });
-            }else{
-                this.props.history.push('/bind')
-            }
-        });
-    }
+    
     loginSession = key => {
-        POST('/wechat/loginSession',{
+        GET('/wechat/loginSession',{
             loginSession:key
         }).then(res => {
             if(res.code=='000000'){
@@ -61,29 +75,14 @@ class Routers extends Component {
             }else{
                 Cookies.remove('hl_p_c_s_t','');
                 if (store.inwx) {
-                    let redirect='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
-                    this.props.router.push(redirect)
+                    window.location.href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
                 }else{
                     this.props.history.replace('/login')
                 }
             }
         });
     }
-    componentWillMount(){
-        let code=this.GetQueryString('code');
-        if(code){
-            this.loginWx({code:code});
-        }else{
-            let session=Cookies.get('hl_p_c_s_t')
-            if (session) {
-                if(store.userInfo.sessionId==''){
-                    this.loginSession(session);
-                }
-            }else{
-                this.props.history.replace('/login')
-            }
-        }
-    }
+    
     //微信jssdk配置
     initWeConfig = key => {
         // wx.ready(function(){

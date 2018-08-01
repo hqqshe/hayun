@@ -57,14 +57,14 @@ class Login extends Component {
  
     handleShowWechat(){
         if (this.props.Store.inwx) {
-            var wxUrl='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html%23%2flogin&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
-            this.props.router.push(wxUrl)
+            window.location.href ='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html%23%2flogin&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
         }else{
             this.setState({showWechat:!this.state.showWechat});
         }
     }
     
     render() {
+        console.log(this.props.Store)
         return (
                 <Provider store={this.store}>
                 <div className='Login_wrap P_auto'>

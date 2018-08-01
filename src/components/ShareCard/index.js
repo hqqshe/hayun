@@ -21,6 +21,15 @@ export default class ShareCard extends Component {
     }
   }
   componentDidMount = () => {
+    
+    let session=Cookies.get('hl_p_c_s_t')
+    if (!session) {
+      if (this.props.Store.inwx) {
+        window.location.href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
+      }else{
+        this.props.history.replace('/login')
+      }
+    }
     var parm=this.state.search.split('?')
     var cid=parm[2].split('=')[1];
     this.getRoom(cid);
@@ -36,17 +45,16 @@ export default class ShareCard extends Component {
     });
   }
   getQcode = (key) =>{
-    this.setState({
-      url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='
-    });
-    // GET('/wechat/getQr',{
-    //   scene_id:key
-    // }).then(res => {
-    //   this.setState({
-    //     // url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='+JSON.parse(res).ticket
-    //     url:res.data.url
-    //   },this.convertImg);
+    // this.setState({
+    //   url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='
     // });
+    GET('/wechat/getQr',{
+      scene_id:key
+    }).then(res => {
+      this.setState({
+        url:res.data.url
+      });
+    });
   }
   setHead = (url) => {
     var img = new Image;
@@ -92,35 +100,48 @@ export default class ShareCard extends Component {
       });
     }); 
   }
+
+  //这里的逻辑太麻烦了 
+  // 1 初始sesion登录 异步登录信息 
+  // 2 本组件要异步获取url 
+  // 3 登录信息获取触发setHead()(setHead()要用到url) 
+  // 4 setHead()异步设置head 
+  // 5 回调设置body 
+  // 每一步都会触发render 这里做限制,登录信息为空不更新,head 和body 都不为空不更新
   shouldComponentUpdate(nextProps, nextState) {
-    console.log(this.props.Store.userInfo.headUrl +'--------'+ nextProps.Store.userInfo.headUrl);
-    //console.log(nextState);
-    return this.state.body == ''||this.state.head == ''||this.state.url == ''
+    if(this.props.Store.userInfo.headUrl==''||(this.props.Store.userInfo.headUrl!=''&&this.state.body!='')){
+      console.log('不更新')
+      return false;
+    }
+    if(this.state.head==''){
+      this.setHead(this.user.headUrl)
+    }
+    console.log('更新')
+    return true;
 }
   
   render() {
-    console.log('-------body----'+this.state.body+'-----user------'+this.user.headUrl);
-    if(this.user.headUrl){
-      this.setHead(this.user.headUrl)
-    }
-    return (
-      <div className="Layouts_wrap hide">
-        <div id='card' className="share_wrap">
-          <img  className="head" src={this.state.head} alt={this.user.name}/>
-          <p className="name">{this.user.name}</p>
-          <p className="des">为你分享一门好课</p>
-          <p className="title">{this.state.room.title}</p>
-          <p className="date">开课时间</p>
-          <p className="time">2018年07月02日 12:12</p>
-          <div className="qcode">
-            <QRCode value={this.state.url} style=""/>
+    console.log('----ShareCard---headUrl--------'+this.props.Store.userInfo.headUrl)
+    if(this.props.Store.userInfo.headUrl){
+      return (
+        <div className="Layouts_wrap hide">
+          <div id='card' className="share_wrap">
+            <img  className="head" src={this.state.head} alt={this.user.name}/>
+            <p className="name">{this.user.name}</p>
+            <p className="des">为你分享一门好课</p>
+            <p className="title">{this.state.room.title}</p>
+            <p className="date">开课时间</p>
+            <p className="time">2018年07月02日 12:12</p>
+            <div className="qcode">
+              <QRCode value={this.state.url} style=""/>
+            </div>
+            <p className="tip">长按识别二维码,参与课程</p>
           </div>
-          <p className="tip">长按识别二维码,参与课程</p>
+          <div className="photo">
+            <img src={this.state.body} alt=""/>
+          </div>
         </div>
-        <div className="photo">
-          <img src={this.state.body} alt=""/>
-        </div>
-      </div>
-    );
+      );
+  }else{return ''}
   }
 }

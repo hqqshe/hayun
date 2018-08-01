@@ -10,12 +10,13 @@ const Search = Input.Search;
 @inject('Store')
 @observer
 class BindPhone extends Component{
-    constructor(){
-        super();
+    constructor(props,context){
+        super(props,context);
         this.state={
             loading:false,
             timer:0,
-            phone:''
+            phone:'',
+            search:props.location.search?props.location.search.split('=')[1]:null,
         }
     }
     /**
@@ -38,7 +39,8 @@ class BindPhone extends Component{
     bingPhone = (p,c) => {
         GET('/wechat/bindPhone/',{
             phone:p,
-            code:c
+            code:c,
+            openid:this.state.search
         }).then(res => {
             console.log(res)
             res.data.account.vip=res.data.vip

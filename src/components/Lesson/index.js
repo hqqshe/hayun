@@ -135,8 +135,7 @@ class Lesson extends Component {
         let session=this.props.Store.userInfo.sessionId;
         if(!session){
             if (this.props.Store.inwx) {
-                let redirect='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
-                this.props.router.push(redirect)
+                window.location.href ='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
             }else{
                 this.props.history.replace('/login')
             }
@@ -185,7 +184,6 @@ class Lesson extends Component {
     render() {
         const reg = /<[^>]*>|<\/[^>]*>|&nbsp;/gm;
         let des = this.state.room.lctDes?this.state.lct.lctDes.replace(reg,''):'暂无简介';
-        console.log('-----this.state.boughts-----'+JSON.stringify(this.state.boughts))
         return (
             <div className='Layouts_wrap clear clearFix'>
                 <img style={{width:'100%'}} src={this.state.room.photo} alt={this.state.room.title}/>

@@ -21,19 +21,11 @@ class Home extends Component {
             skey:''
         }
     }
-    
     componentWillReceiveProps = (nextProps) => {
         if(this.state.skey===nextProps.skey) return;
-        //this.getData(nextProps.skey)
-    }
-    logout = () =>{
-        Cookies.remove('JSESSIONID', { path: '/' })
-        Cookies.remove('userName', { path: '/' })
-        this.props.history.replace('/login')
     }
     handleSearch = (e) => {
         this.setState({skey:e});
-        
     }
 
     render() {
