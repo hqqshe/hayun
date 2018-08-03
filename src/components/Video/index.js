@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import Footer from '../Footer/Footer';
 import MenuSwitch from '../Menu/MenuSwitch';
-import {GET} from '../fetch/myfetch';
+import {GET} from '../fetch';
+import utils from '../utils';
 import { observer, inject } from 'mobx-react'
 import '../css/index.less'
 
@@ -44,86 +45,85 @@ class Video extends Component {
     }
     //支付
     handleBuy = key => {
-        console.log(key)
-        let evetype=1;
-        var ua = window.navigator.userAgent; 
-        if (ua.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone|MicroMessenger)/i)) {
-            evetype=2;
-            if (ua.match(/MicroMessenger/i) == 'micromessenger') {
-                evetype=3;  
-            }
-        }
-        let goods=[];
-        if(!key){
-            for (let i = 0; i < this.state.list.length; i++) {
-                let j = 0;
-                for (; j < this.state.boughts.length; j++) {
-                    if(this.state.list[i].id==this.state.boughts[j]) break;
-                }
-                if(j==this.state.boughts.length)
-                    goods.push(this.state.list[i].goodsId)
-            }
-
+         //todo 检查登录
+         if(this.props.Store.userInfo.sessionId == ''){
+            utils.login(this.props);
         }else{
-            goods.push(key);
-        }
-        GET('/wechat/pay',{
-            goodIds:JSON.stringify(goods),
-            type:evetype,
-            ticket:this.props.Store.ticket,
-            goodtype:1
-        }).then(res => {
-            if(res.code == '000000'){
-                if(res.data.isSuccess){
-                    //余额支付成功
-                }
-                if(evetype=1){
-                    console.log(res)
-                    if(res.data.paywayId == 1){// 微信支付二维码
-                        $(".pay-content-list").fadeIn().find(".qrcode").empty().qrcode({text:res.data.payUrl,render:"image",ecLevel:"M"});
-                        //pay_btn.off('click');
-                        $timer = window.setInterval(reqpay,5000); 
-                        function reqpay(){
-                            $.ajax({
-                                url: ctx+'/payst',
-                                method: 'POST',
-                                data: {'orderId': orderId},
-                                success:function(res) {			
-                                    if (res=='true'){
-                                        window.clearInterval($timer)
-                                        payResult.slideDown().siblings().hide();
-                                        edition?payResult.find('.sucess').fadeIn().find('.myCourse').attr('href',jumpUrl).prev().show()
-                                               :payResult.find('.sucess').fadeIn().find('.myCourse').attr('href',jumpUrl);
-                                        $timer = window.setInterval(function(){
-                                            window.location = jumpUrl;
-                                        },8000); 
-                                    }else{
-                                        console.log(res);
-                                    }
-                                }
-                            });
-                        }
-                     }
-                }else  if(evetype=2){
-                    //微信外 跳转呼出微信支付
-                    window.location.href=encodeURI(res.data.result.mweb_url);
-                }else{
-                    //微信内
-                    this.callPay(res.data)
+            console.log(key)
+            let evetype=1;
+            var ua = window.navigator.userAgent; 
+            if (ua.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone|MicroMessenger)/i)) {
+                evetype=2;
+                if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+                    evetype=3;  
                 }
             }
-        });
-    }
-    //获取url参数
-    GetQueryString = (name)=> { 
-        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i"); 
-        var r = this.state.search.substr(1).match(reg); 
-        if (r!=null) return (r[2]); return null; 
+            let goods=[];
+            if(!key){
+                for (let i = 0; i < this.state.list.length; i++) {
+                    let j = 0;
+                    for (; j < this.state.boughts.length; j++) {
+                        if(this.state.list[i].id==this.state.boughts[j]) break;
+                    }
+                    if(j==this.state.boughts.length)
+                        goods.push(this.state.list[i].goodsId)
+                }
+
+            }else{
+                goods.push(key);
+            }
+            GET('/wechat/pay',{
+                goodIds:JSON.stringify(goods),
+                type:evetype,
+                ticket:this.props.Store.ticket,
+                goodtype:1
+            }).then(res => {
+                if(res.code == '000000'){
+                    if(res.data.isSuccess){
+                        //余额支付成功
+                    }
+                    if(evetype=1){
+                        console.log(res)
+                        if(res.data.paywayId == 1){// 微信支付二维码
+                            $(".pay-content-list").fadeIn().find(".qrcode").empty().qrcode({text:res.data.payUrl,render:"image",ecLevel:"M"});
+                            //pay_btn.off('click');
+                            $timer = window.setInterval(reqpay,5000); 
+                            function reqpay(){
+                                $.ajax({
+                                    url: ctx+'/payst',
+                                    method: 'POST',
+                                    data: {'orderId': orderId},
+                                    success:function(res) {			
+                                        if (res=='true'){
+                                            window.clearInterval($timer)
+                                            payResult.slideDown().siblings().hide();
+                                            edition?payResult.find('.sucess').fadeIn().find('.myCourse').attr('href',jumpUrl).prev().show()
+                                                :payResult.find('.sucess').fadeIn().find('.myCourse').attr('href',jumpUrl);
+                                            $timer = window.setInterval(function(){
+                                                window.location = jumpUrl;
+                                            },8000); 
+                                        }else{
+                                            console.log(res);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }else  if(evetype=2){
+                        //微信外 跳转呼出微信支付
+                        window.location.href=encodeURI(res.data.result.mweb_url);
+                    }else{
+                        //微信内
+                        this.callPay(res.data)
+                    }
+                }
+            });
+        }
     }
     //加载钩子
     componentDidMount = () => {
         this.setState({
-            goodsId:this.GetQueryString('goodsId')
+            goodsId:utils.queryStr('goodsId',this.state.search)
         },this.getVidoes)
         wx.config({
             debug:false,

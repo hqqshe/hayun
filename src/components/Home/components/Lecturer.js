@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ItemLct from '../../Items/ItemLct';
-import {GET} from '../../fetch/myfetch';
+import {GET} from '../../fetch';
 
 class Lecturer extends React.Component {
   constructor(props){

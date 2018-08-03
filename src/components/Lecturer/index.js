@@ -5,7 +5,8 @@ import Tab from './components/Tab';
 import ItemClass from '../Items/ItemClass';
 import Footer from '../Footer/Footer';
 import MenuSwitch from '../Menu/MenuSwitch';
-import {GET,POST} from '../fetch/myfetch'
+import {GET,POST} from '../fetch';
+import utils from '../utils';
 import { observer, inject } from 'mobx-react'
 import '../css/index.less'
 
@@ -65,17 +66,12 @@ class Lecturer extends Component {
     }
     handFollow =() =>{
         //todo 检查登录
-        let session=this.props.Store.userInfo.sessionId;
-        if(!session){
-            if (this.props.Store.inwx) {
-                window.location.href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
-            }else{
-                this.props.history.replace('/login')
-            }
+        if(this.props.Store.userInfo.sessionId == ''){
+            utils.login(this.props);
         }else{
             POST('/customer/follow',{
                 target:this.state.lct.id,
-                relType:1,          
+                relType:1,
             }).then(res => {
                 if(res == true){
                     let data = Object.assign({}, this.state.lct, { relType: 1 })

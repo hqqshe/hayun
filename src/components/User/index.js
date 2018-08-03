@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import MenuSwitch from '../Menu/MenuSwitch';
-import {GET,POST} from '../fetch/myfetch'
+import {GET,POST} from '../fetch';
+import utils from '../utils';
 import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
 import '../css/index.less'
@@ -11,47 +12,20 @@ class User extends Component {
     constructor(props){
         super(props)
         this.state={
-            search:props.location.search?props.location.search.split('=')[1]:null,
-            serielist:[],
-            publist:[],
-            lct:{},
-            switch:true
         }
     }
-
-
-    componentDidMount = () => {
-    }
-    componentWillReceiveProps = (nextProps) => {
-    }
-    handFollow =() =>{
+    componentWillMount = () => {
         //todo 检查登录
-        POST('/customer/follow',{
-            target:this.state.lct.id,
-            relType:1,          
-        }).then(res => {
-            if(res == true){
-                let data = Object.assign({}, this.state.lct, { relType: 1 })
-                this.setState.lct({
-                    lct:data
-                })
-                // GET('/api/getLct',{
-                //     lctId:key
-                // }).then(res => {
-                //     if(res.code == '000000'){
-                //         this.setState({lct:res.data.lct});
-                //     }
-                // });
-            }
-        });
+        if(this.props.Store.userInfo.sessionId == ''){
+            utils.login(this.props);
+        }
     }
     handClick =(value) =>{
         this.setState({switch:value})
     }
     render() {
+        console.log('this.props.Store.userInfo.sessionId-------'+this.props.Store.userInfo.sessionId)
         const user=this.props.Store.userInfo;
-        const reg = /<[^>]*>|<\/[^>]*>|&nbsp;/gm;
-        let des = this.state.lct.lctDes?this.state.lct.lctDes.replace(reg,''):'没有简介';
         return (
             <div className='Layouts_wrap'>
                 <div className="user">

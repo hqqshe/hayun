@@ -5,7 +5,7 @@ import ItemLive from '../../Items/ItemLive';
 import ItemClass from '../../Items/ItemClass'
 import ItemVideo from '../../Items/ItemVideo'
 import Searchbar from '../../Home/components/Searchbar'
-import {GET} from '../../fetch/myfetch';
+import {GET} from '../../fetch';
 
 //强大的分类子页面
 class Cate extends React.Component {

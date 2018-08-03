@@ -21,6 +21,9 @@ class Home extends Component {
             skey:''
         }
     }
+    componentWillMount = () => {
+        
+    }
     componentWillReceiveProps = (nextProps) => {
         if(this.state.skey===nextProps.skey) return;
     }

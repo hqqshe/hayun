@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import html2canvas from 'html2canvas';
-import {GET} from '../fetch/myfetch';
+import {GET} from '../fetch';
+import utils from '../utils';
 import QRCode from 'qrcode.react';
 import { inject, observer } from 'mobx-react';
-import Cookies from 'js-cookie';
 import '../css/share.less';
-
+let update=true;
 @inject('Store')
 @observer
 export default class ShareCard extends Component {
@@ -20,20 +20,25 @@ export default class ShareCard extends Component {
       room:{},
     }
   }
-  componentDidMount = () => {
-    
-    let session=Cookies.get('hl_p_c_s_t')
-    if (!session) {
-      if (this.props.Store.inwx) {
-        window.location.href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
-      }else{
-        this.props.history.replace('/login')
-      }
+  componentWillMount = () => {
+    if(this.props.Store.userInfo.sessionId == ''){
+      utils.login(this.props,this.initData);
+    }else{
+      this.initData();
     }
+  }
+  componentWillUpdate = () => {
+    console.log('--------initData----headUrl-------'+this.props.Store.userInfo.headUrl)
+    if(update) this.initData();
+  }
+  //初始化 数据
+  initData = () =>{
+    update=false;
     var parm=this.state.search.split('?')
     var cid=parm[2].split('=')[1];
     this.getRoom(cid);
-    this.getQcode(cid)
+    this.getQcode(cid);
+    this.setHead(this.props.Store.userInfo.headUrl);
   }
   getRoom = key => {
     GET('/api/getRoom',{
@@ -45,15 +50,18 @@ export default class ShareCard extends Component {
     });
   }
   getQcode = (key) =>{
-    // this.setState({
-    //   url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='
-    // });
+   
     GET('/wechat/getQr',{
       scene_id:key
     }).then(res => {
-      this.setState({
-        url:res.data.url
+       this.setState({
+        url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='
       });
+      // if(res.code == '000000'){
+      //   this.setState({
+      //     url:res.data.url
+      //   });
+      // }
     });
   }
   setHead = (url) => {
@@ -108,40 +116,37 @@ export default class ShareCard extends Component {
   // 4 setHead()异步设置head 
   // 5 回调设置body 
   // 每一步都会触发render 这里做限制,登录信息为空不更新,head 和body 都不为空不更新
-  shouldComponentUpdate(nextProps, nextState) {
-    if(this.props.Store.userInfo.headUrl==''||(this.props.Store.userInfo.headUrl!=''&&this.state.body!='')){
-      console.log('不更新')
-      return false;
-    }
-    if(this.state.head==''){
-      this.setHead(this.user.headUrl)
-    }
-    console.log('更新')
-    return true;
-}
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   if(this.props.Store.userInfo.headUrl==''||(this.props.Store.userInfo.headUrl!=''&&this.state.body!='')){
+  //     console.log('不更新')
+  //     return false;
+  //   }
+  //   if(this.state.head==''){
+      
+  //   }
+  //   console.log('更新')
+  //   return true;
+  // }
   
   render() {
-    console.log('----ShareCard---headUrl--------'+this.props.Store.userInfo.headUrl)
-    if(this.props.Store.userInfo.headUrl){
-      return (
-        <div className="Layouts_wrap hide">
-          <div id='card' className="share_wrap">
-            <img  className="head" src={this.state.head} alt={this.user.name}/>
-            <p className="name">{this.user.name}</p>
-            <p className="des">为你分享一门好课</p>
-            <p className="title">{this.state.room.title}</p>
-            <p className="date">开课时间</p>
-            <p className="time">2018年07月02日 12:12</p>
-            <div className="qcode">
-              <QRCode value={this.state.url} style=""/>
-            </div>
-            <p className="tip">长按识别二维码,参与课程</p>
+    return (
+      <div className="Layouts_wrap hide">
+        <div id='card' className="share_wrap">
+          <img  className="head" src={this.state.head} alt={this.user.name}/>
+          <p className="name">{this.user.name}</p>
+          <p className="des">为你分享一门好课</p>
+          <p className="title">{this.state.room.title}</p>
+          <p className="date">开课时间</p>
+          <p className="time">2018年07月02日 12:12</p>
+          <div className="qcode">
+            <QRCode value={this.state.url} style=""/>
           </div>
-          <div className="photo">
-            <img src={this.state.body} alt=""/>
-          </div>
+          <p className="tip">长按识别二维码,参与课程</p>
         </div>
-      );
-  }else{return ''}
+        <div className="photo">
+          <img src={this.state.body} alt=""/>
+        </div>
+      </div>
+    )
   }
 }

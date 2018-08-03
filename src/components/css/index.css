@@ -744,6 +744,30 @@ a.link {
   color: #b8b0b0;
   line-height: 1.5;
 }
+.Layouts_wrap .buy_qcode {
+  text-align: center;
+}
+.Layouts_wrap .buy_qcode .qcode {
+  position: fixed;
+  height: 320px;
+  width: 300px;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  margin: auto;
+  padding: 0 50px;
+  background-color: #fff;
+  border-radius: 5px;
+}
+.Layouts_wrap .buy_qcode .qrcode-tip {
+  font-size: 0.8rem;
+  margin: 20px 0;
+}
+.Layouts_wrap .buy_qcode .qrcode-title {
+  font-weight: bold;
+  margin: 20px;
+}
 @-webkit-keyframes loadingCircle {
   0% {
     -webkit-transform-origin: 50% 50%;

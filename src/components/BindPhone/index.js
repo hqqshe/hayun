@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import MenuSwitch from '../Menu/MenuSwitch'
 import { Form, Input, Button } from 'antd';
-import {GET,POST} from '../fetch/myfetch';
+import {GET,POST} from '../fetch';
 import { inject, observer } from 'mobx-react';
 
 const FormItem = Form.Item;

@@ -7,6 +7,7 @@ import 'url-search-params-polyfill';
    * @param method 请求方式
    */
   function commonFetch(url, options, method = 'GET') {
+    console.log(method+'----fetch url---'+url)
     const searchStr =new URLSearchParams(options);
     let initObj = {}
     if (method === 'GET') { // 如果是GET请求，拼接url

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ItemVideo from '../../Items/ItemVideo'
-import {GET} from '../../fetch/myfetch';
+import {GET} from '../../fetch';
 
 class Video extends React.Component {
   constructor(props){

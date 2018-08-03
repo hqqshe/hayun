@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ItemClass from '../../Items/ItemClass'
-import {GET} from '../../fetch/myfetch';
+import {GET} from '../../fetch';
 
 class Series extends React.Component {
   constructor(props){

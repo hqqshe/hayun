@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ItemLive from '../../Items/ItemLive';
-import {GET} from '../../fetch/myfetch';
+import {GET} from '../../fetch';
 
 class Lives extends React.Component {
   constructor(props){
