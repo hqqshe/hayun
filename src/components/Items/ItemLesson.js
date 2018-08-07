@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 class ItemLesson extends React.Component{
     handClick = () =>{
+        
         this.props.buy(this.props.item.goodsId);
     }
     render() {
@@ -19,7 +20,7 @@ class ItemLesson extends React.Component{
         }else if(!this.props.isSeries){
             buyInfo = <div className="buy_info clearfix">
                         <span className="price rmb">{this.props.item.price/100}</span> 
-                        <a onClick={this.handClick} className="buy_btn">报名</a>
+                        <span onClick={this.handClick} className="buy_btn">报名</span>
                       </div>
         }
         return (

@@ -28,7 +28,7 @@ class Login extends Component {
      * 手动登录
      */
     inputLogin = (key,form) => {
-        POST('/wechat/login',key).then(res => {
+        GET('/wechat/login',key).then(res => {
             if(res.code=='000000'){
                 res.data.account.vip=res.data.vip
                 this.props.Store.updateName(res.data.account)

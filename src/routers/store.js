@@ -22,7 +22,6 @@ class Store {
         vip:''
     };
     @observable loading = false;
-    @observable ticket = '';
     @observable inwx = false;
 
     @action updateName = (res) => {
@@ -36,9 +35,6 @@ class Store {
     }
     @action updateLoading = (boolean) => {
         this.loading = boolean
-    }
-    @action updateTicket = (from) => {
-        this.ticket = from
     }
     @action updateInwx = (boolean) => {
         this.inwx = boolean

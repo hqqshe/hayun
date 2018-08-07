@@ -3,6 +3,7 @@ import React from 'react'
 class SeriesBuy extends React.Component{
     
     handClick = () =>{
+        console.log('------handClick-----------')
         this.props.buy();
     }
     render() {

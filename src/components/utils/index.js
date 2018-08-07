@@ -127,10 +127,22 @@ let share = (title,link,imgUrl,desc,sucess) => {
     });
 });
 }
+
+let handleFrom = (key,value,ev) => {
+  let storage = window.localStorage;
+    if(value){
+      ev.setState({from:value});
+      storage.setItem(key,value);
+    }else{
+      let old = storage.getItem(key);
+      old && ev.setState({from:old});
+    }
+}
 export default {
   search: locationSearch,
   queryStr: querySearch,
   login: login,
   weConfig:weConfig,
-  share:share
+  share:share,
+  handleFrom:handleFrom
 }

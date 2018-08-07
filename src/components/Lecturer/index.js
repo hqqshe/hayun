@@ -69,13 +69,13 @@ class Lecturer extends Component {
         if(this.props.Store.userInfo.sessionId == ''){
             utils.login(this.props);
         }else{
-            POST('/customer/follow',{
+            GET('/customer/follow',{
                 target:this.state.lct.id,
                 relType:1,
             }).then(res => {
                 if(res == true){
                     let data = Object.assign({}, this.state.lct, { relType: 1 })
-                    this.setState.lct({
+                    this.setState({
                         lct:data
                     })
                 }

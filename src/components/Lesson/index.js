@@ -24,8 +24,9 @@ class Lesson extends Component {
             list:[],
             boughts:[],
             switch:true,
-            buyQcode:'http://localhost:8080/#/lesson?lid=3141&cid=444',
-            showQcode:true
+            buyQcode:'',
+            showQcode:true,
+            from:null
         }
     }
    
@@ -71,11 +72,11 @@ class Lesson extends Component {
             this.setState({showQcode:true});
         }else{
             console.log(key)
-            let evetype=1;
+            var evetype=1;
             var ua = window.navigator.userAgent; 
             if (ua.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone|MicroMessenger)/i)) {
                 evetype=2;
-                if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+                if (ua.toLowerCase().match(/MicroMessenger/i) == 'micromessenger') {
                     evetype=3;  
                 }
             }
@@ -96,25 +97,23 @@ class Lesson extends Component {
             GET('/wechat/pay',{
                 goodIds:JSON.stringify(goods),
                 type:evetype,
-                ticket:this.props.Store.ticket
+                from:this.state.from
             }).then(res => {
                 if(res.code == '000000'){
                     if(res.data.isSuccess){
                         this.setState({boughts:this.state.boughts.concat(goods)});//余额支付成功
-                    }
-                    if(evetype=1){
-                        //扫码
-                        this.setState({
-                            buyQcode:res.data.payUrl,
-                            showQcode:true
-                        });
-                        this.payst(res.data.orderId,goods)
-                    }else  if(evetype=2){
-                        //微信外 跳转呼出微信支付
-                        window.location.href=encodeURI(res.data.result.mweb_url);
                     }else{
-                        //微信内
-                        this.callPay(res.data,goods)
+                        if(evetype == 1){            //扫码
+                            this.setState({
+                                buyQcode:res.data.payUrl,
+                                showQcode:true
+                            });
+                            this.payst(res.data.orderId,goods)
+                        }else  if(evetype == 2){    //微信外 跳转呼出微信支付
+                            window.location.href=encodeURI(res.data.result.mweb_url);
+                        }else{                      //微信内
+                            this.callPay(res.data.result,goods)
+                        }
                     }
                 }
             });
@@ -137,13 +136,14 @@ class Lesson extends Component {
         },5000); 
     }
     componentWillMount = () => {
-        var lid = utils.queryStr('lid',this.state.search);
-        var cid = utils.queryStr('cid',this.state.search);
-        var from = utils.queryStr('ticket',this.state.search);
-        from && this.props.Store.updateTicket(from);
+        let lid = utils.queryStr('lid',this.state.search);
+        let cid = utils.queryStr('cid',this.state.search);
+        let from = utils.queryStr('from',this.state.search)
         this.getLct(lid);
         this.getRoom(cid);
         this.getLesson(cid);
+        //保存到localstore 或者 拿出对应cid的from
+        utils.handleFrom(cid,from,this);
     }
 
     handFollow =() =>{
@@ -152,13 +152,13 @@ class Lesson extends Component {
         if(this.props.Store.userInfo.sessionId == ''){
             utils.login(this.props);
         }else{
-            POST('/customer/follow',{
+            GET('/customer/follow',{
                 target:this.state.lct.id,
                 relType:1,          
             }).then(res => {
                 if(res == true){
                     let data = Object.assign({}, this.state.lct, { relType: 1 })
-                    this.setState.lct({
+                    this.setState({
                         lct:data
                     })
                 }
