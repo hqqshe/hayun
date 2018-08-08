@@ -1,27 +1,30 @@
 import React from 'react'
-import { Link } from 'react-router-dom';
 
 class ItemLesson extends React.Component{
     handClick = () =>{
-        
         this.props.buy(this.props.item.goodsId);
     }
     render() {
         let time=this.props.item.startTime.substring(0,this.props.item.startTime.length-3)
-        let bought=[];
-        this.props.boughts && this.props.boughts.filter((k)=>{
-            return k==this.props.item.goodsId
-        })
         let buyInfo='';
-        if(bought.length>0){
-            buyInfo = <div className="buy_info clearfix">
-                        <a className="buy_btn play">已报名</a>
-                      </div>
-        }else if(!this.props.isSeries){
+        if(!this.props.isSeries){
             buyInfo = <div className="buy_info clearfix">
                         <span className="price rmb">{this.props.item.price/100}</span> 
                         <span onClick={this.handClick} className="buy_btn">报名</span>
                       </div>
+        }
+        if(this.props.boughts){
+            let i = 0;
+            for (; i < this.props.boughts.length; i++) {
+                if(this.props.item.goodsId == this.props.boughts[i]){
+                    break;
+                }
+            }
+            if(this.props.boughts.length != i){
+                buyInfo = <div className="buy_info clearfix">
+                            <a className="buy_btn play">已报名</a>
+                         </div>
+            }
         }
         return (
             <div className='item_lesson clearfix'>

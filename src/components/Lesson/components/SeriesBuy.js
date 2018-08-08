@@ -3,11 +3,21 @@ import React from 'react'
 class SeriesBuy extends React.Component{
     
     handClick = () =>{
-        console.log('------handClick-----------')
         this.props.buy();
     }
     render() {
         let serie=this.props.room.classType=='系列课';
+        let buy = null;
+        if(serie){
+            buy=<a href="javascript:void(0);" className="buy_btn" onClick={this.handClick}>立即报名</a>
+            if(this.props.num>0){
+                if(this.props.bought)
+                buy = <a href="javascript:void(0);" className="buy_btn play">已报名</a>
+            }else{
+                buy = <a href="javascript:void(0);" className="buy_btn play">暂无课程</a>
+            }
+            
+        }
         return (
             <div className='buy_wrap wrap_padding'>
                  <div className="info">
@@ -22,12 +32,9 @@ class SeriesBuy extends React.Component{
                     :null
                     }
                 </div>
-                {serie
-                ? <div className='buy'>
-                    <a href="javascript:void(0);" className="buy_btn" onClick={this.handClick}>立即报名</a>
+                <div className='buy'>
+                    {buy}
                 </div>
-                :null
-                }
             </div>
         )
     }

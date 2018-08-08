@@ -5,7 +5,8 @@ import utils from '../utils';
 import QRCode from 'qrcode.react';
 import { inject, observer } from 'mobx-react';
 import '../css/share.less';
-let update=true;
+
+let sessionInit=true;
 @inject('Store')
 @observer
 export default class ShareCard extends Component {
@@ -13,33 +14,36 @@ export default class ShareCard extends Component {
     super(props)
     this.user = this.props.Store.userInfo;
     this.state = {
-      search:props.location.search,
       url:'',
       head:'',
       body:'',
       room:{},
     }
   }
+
+  componentWillUpdate(nextProps, nextState) {
+    console.log(nextProps.Store.userInfo.sessionId+'-------componentWillUpdate-----------'+this.props.Store.userInfo.sessionId)
+    if(this.props.Store.userInfo.sessionId&&sessionInit){
+      sessionInit=false;
+      this.initData();
+    }
+  }
+
   componentWillMount = () => {
     if(this.props.Store.userInfo.sessionId == ''){
-      utils.login(this.props,this.initData);
+      utils.login(this.props);
     }else{
       this.initData();
     }
   }
-  componentWillUpdate = () => {
-    console.log('--------initData----headUrl-------'+this.props.Store.userInfo.headUrl)
-    if(update) this.initData();
-  }
   //初始化 数据
   initData = () =>{
-    update=false;
-    var parm=this.state.search.split('?')
-    var cid=parm[2].split('=')[1];
+    let cid=utils.queryStr('cid',this.props.location.search);
     this.getRoom(cid);
     this.getQcode(cid);
-    this.setHead(this.props.Store.userInfo.headUrl);
+    this.getImg(this.props.Store.userInfo.headUrl)
   }
+  //获取班级信息
   getRoom = key => {
     GET('/api/getRoom',{
       cid:key            
@@ -49,19 +53,27 @@ export default class ShareCard extends Component {
       }
     });
   }
+  //获取分享二维码
   getQcode = (key) =>{
-   
     GET('/wechat/getQr',{
       scene_id:key
     }).then(res => {
-       this.setState({
-        url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='
-      });
-      // if(res.code == '000000'){
-      //   this.setState({
-      //     url:res.data.url
-      //   });
-      // }
+      //  this.setState({
+      //   url:'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='
+      // });
+      if(res.code == '000000'){
+        this.setState({
+          url:res.data.url
+        });
+      }
+    });
+  }
+  //获取头像
+  getImg = key => {
+    GET('/api/getBase64',{
+      url:key            
+    }).then(res => {
+        this.setState({head:res},this.convertImg);
     });
   }
   setHead = (url) => {
@@ -84,6 +96,7 @@ export default class ShareCard extends Component {
     var dataURL = canvas.toDataURL("image/octet-stream");
     return dataURL;
   }
+  //生成图片
   convertImg  = () =>{
     var opts =  {
       allowTaint: true, //允许污染
@@ -108,25 +121,6 @@ export default class ShareCard extends Component {
       });
     }); 
   }
-
-  //这里的逻辑太麻烦了 
-  // 1 初始sesion登录 异步登录信息 
-  // 2 本组件要异步获取url 
-  // 3 登录信息获取触发setHead()(setHead()要用到url) 
-  // 4 setHead()异步设置head 
-  // 5 回调设置body 
-  // 每一步都会触发render 这里做限制,登录信息为空不更新,head 和body 都不为空不更新
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   if(this.props.Store.userInfo.headUrl==''||(this.props.Store.userInfo.headUrl!=''&&this.state.body!='')){
-  //     console.log('不更新')
-  //     return false;
-  //   }
-  //   if(this.state.head==''){
-      
-  //   }
-  //   console.log('更新')
-  //   return true;
-  // }
   
   render() {
     return (

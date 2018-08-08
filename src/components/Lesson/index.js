@@ -21,12 +21,13 @@ class Lesson extends Component {
             search:props.location.search,
             lct:{},
             room:{},
-            list:[],
-            boughts:[],
+            list:[],//课程数组
+            boughts:[],//已购买课程
             switch:true,
             buyQcode:'',
             showQcode:true,
-            from:null
+            from:null,
+            bought:false    //是否已经购买
         }
     }
    
@@ -58,20 +59,33 @@ class Lesson extends Component {
             if(res.code == '000000'){
                 this.setState({
                     list:res.data.Lesson,
-                    boughts:res.data.boughts
+                    boughts:res.data.boughts,
+                    bought:res.data.boughts?this.isBought(res.data.Lesson,res.data.boughts).length == 0:false
                 });
             }
         });
     }
     //支付
-    buy = key => {
+    isBought = (list,boughts) => {
+        let goods=[];
+        for (let i = 0; i < list.length; i++) {
+            let j = 0;
+            for (; j < boughts.length; j++) {
+                if(list[i].goodsId==boughts[j]) break;
+            }
+            if(j==boughts.length)
+                goods.push(list[i].goodsId)
+        }
+        return goods
+    }
+    //支付
+    handleBuy = key => {
         //todo 检查登录
         if(this.props.Store.userInfo.sessionId == ''){
             utils.login(this.props);
         }else if(this.state.buyQcode){
             this.setState({showQcode:true});
         }else{
-            console.log(key)
             var evetype=1;
             var ua = window.navigator.userAgent; 
             if (ua.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone|MicroMessenger)/i)) {
@@ -82,41 +96,40 @@ class Lesson extends Component {
             }
             let goods=[];
             if(!key){
-                for (let i = 0; i < this.state.list.length; i++) {
-                    let j = 0;
-                    for (; j < this.state.boughts.length; j++) {
-                        if(this.state.list[i].id==this.state.boughts[j]) break;
-                    }
-                    if(j==this.state.boughts.length)
-                        goods.push(this.state.list[i].goodsId)
-                }
-
+                goods = this.isBought(this.state.list,this.state.boughts)
             }else{
-                goods.push(key);
+                goods.push(key); 
             }
-            GET('/wechat/pay',{
-                goodIds:JSON.stringify(goods),
-                type:evetype,
-                from:this.state.from
-            }).then(res => {
-                if(res.code == '000000'){
-                    if(res.data.isSuccess){
-                        this.setState({boughts:this.state.boughts.concat(goods)});//余额支付成功
-                    }else{
-                        if(evetype == 1){            //扫码
+            if(goods.length == 0){
+                this.setState({bought:true});
+            }else{
+                GET('/wechat/pay',{
+                    goodIds:JSON.stringify(goods),
+                    type:evetype,
+                    from:this.state.from
+                }).then(res => {
+                    if(res.code == '000000'){
+                        if(res.data.isSuccess){
                             this.setState({
-                                buyQcode:res.data.payUrl,
-                                showQcode:true
-                            });
-                            this.payst(res.data.orderId,goods)
-                        }else  if(evetype == 2){    //微信外 跳转呼出微信支付
-                            window.location.href=encodeURI(res.data.result.mweb_url);
-                        }else{                      //微信内
-                            this.callPay(res.data.result,goods)
+                                boughts:this.state.boughts.concat(goods),
+                                bought:true
+                            });//余额支付成功
+                        }else{
+                            if(evetype == 1){            //扫码
+                                this.setState({
+                                    buyQcode:res.data.payUrl,
+                                    showQcode:true
+                                });
+                                this.payst(res.data.orderId,goods)
+                            }else  if(evetype == 2){    //微信外 跳转呼出微信支付
+                                window.location.href=encodeURI(res.data.result.mweb_url);
+                            }else{                      //微信内
+                                this.callPay(res.data.result,goods)
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
     }
     //回调成功
@@ -206,11 +219,11 @@ class Lesson extends Component {
                 <div className='share_btn'>
                     <Link to={{
                     pathname: '/share',
-                    search: '?lid='+this.state.lct.id+'?cid='+this.state.room.id
+                    search: '?cid='+this.state.room.id
                     }}></Link>
                 </div>
                 <Follow lct={this.state.lct} handFollow={this.handFollow}/>
-                <SeriesBuy num={this.state.list.length} buy={this.buy} room={this.state.room} />
+                <SeriesBuy bought={this.state.bought} num={this.state.list.length} buy={this.handleBuy} room={this.state.room} />
                 <Tab handClick={this.handClick}/>
                 <div className="teach_info">
                     <div style={{display:this.state.switch?'block':'none'}}>
@@ -221,7 +234,7 @@ class Lesson extends Component {
                             {
                                 this.state.list.map((k) => {
                                     return ( 
-                                    <ItemLesson buy={this.buy} isSeries={this.state.room.classType=='系列课'} item={k} boughts={this.state.boughts}/>
+                                    <ItemLesson buy={this.handleBuy} isSeries={this.state.room.classType=='系列课'} item={k} boughts={this.state.boughts}/>
                                     )
                                 })
                             }

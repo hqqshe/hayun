@@ -55,7 +55,6 @@ class Video extends Component {
         }else if(this.state.buyQcode){
             this.setState({showQcode:true});
         }else{
-            console.log(key)
             var evetype=1;
             var ua = window.navigator.userAgent; 
             if (ua.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone|MicroMessenger)/i)) {
@@ -65,28 +64,17 @@ class Video extends Component {
                 }
             }
             let goods=[];
-            if(!key){
-                for (let i = 0; i < this.state.list.length; i++) {
-                    let j = 0;
-                    for (; j < this.state.boughts.length; j++) {
-                        if(this.state.list[i].id==this.state.boughts[j]) break;
-                    }
-                    if(j==this.state.boughts.length)
-                        goods.push(this.state.list[i].goodsId)
-                }
-
-            }else{
-                goods.push(key);
-            }
+            goods.push(key);
             GET('/wechat/pay',{
                 goodIds:JSON.stringify(goods),
                 type:evetype,
                 goodtype:1,
-                ticket:this.props.Store.ticket
+                from:this.state.from
             }).then(res => {
                 if(res.code == '000000'){
-                    if(res.data.isSuccess){
-                        this.setState({boughts:this.state.boughts.concat(goods)});//余额支付成功
+                    if(res.data.isSuccess){ //余额支付成功
+                        let data = Object.assign({}, this.state.videoPkg, { boughted: true });
+                        this.setState({videoPkg:data});
                     }else{
                         if(evetype == 1){            //扫码
                             this.setState({
@@ -161,7 +149,7 @@ class Video extends Component {
                 {/* <div className='share_btn'>
                     <Link to={{
                     pathname: '/share',
-                    search: '?lid='+this.state.lct.id+'?cid='+this.state.room.id
+                    search: '?lid='+this.state.lct.id+'&cid='+this.state.room.id
                     }}></Link>
                  </div> */}
                 <div className='buy_wrap wrap_padding video'>
