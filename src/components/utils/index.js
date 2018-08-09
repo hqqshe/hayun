@@ -36,7 +36,7 @@ let login = (props) => {
     });
   } else {
     if (props.Store.inwx) {
-      window.location.href = encodeURI('https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_base&state=1#wechat_redirect');
+      window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_base&state=1#wechat_redirect';
     } else {
       props.history.replace('/login')
     }
