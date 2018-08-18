@@ -22,7 +22,6 @@ class Store {
         vip:''
     };
     @observable loading = false;
-    @observable inwx = false;
 
     @action updateName = (res) => {
         this.userInfo.name = res.userName
@@ -35,9 +34,6 @@ class Store {
     }
     @action updateLoading = (boolean) => {
         this.loading = boolean
-    }
-    @action updateInwx = (boolean) => {
-        this.inwx = boolean
     }
 }
 

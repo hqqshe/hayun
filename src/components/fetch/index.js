@@ -7,11 +7,12 @@ import 'url-search-params-polyfill';
    * @param method 请求方式
    */
   function commonFetch(url, options, method = 'GET') {
-    console.log(method+'----fetch url---'+url)
+    console.log(method+'----fetch options---'+JSON.stringify(options))
     const searchStr =new URLSearchParams(options);
     let initObj = {}
     if (method === 'GET') { // 如果是GET请求，拼接url
-      url += '?' + searchStr;
+      if(JSON.stringify(options) != "{}")
+        url += '?' + searchStr;
       initObj = {
         method: method,
         credentials: 'include',

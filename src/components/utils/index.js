@@ -9,7 +9,7 @@ let locationSearch = (name) => {
 
 let querySearch = (name, search) => {
   console.log('-----querySearch------'+search)
-  if (search.length < 1) return null;
+  if (!search||search.length < 1) return null;
   let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
   let r = search.substr(1).match(reg);
   if (r != null) return (r[2]);
@@ -20,7 +20,6 @@ let login = (props) => {
     return;
   }
   let openId = window.sessionStorage.openId;
-  console.log('----openId-----'+openId+"--cookies--"+Cookies.get('hl_p_c_s_t')+"--inwx--"+props.Store.inwx)
   if (openId) {
     GET('/wechat/loginOpenId', {
       'openId': openId
@@ -35,7 +34,7 @@ let login = (props) => {
       }
     });
   } else {
-    if (props.Store.inwx) {
+    if (utils.isWeixin5()) {
       window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_base&state=1#wechat_redirect';
     } else {
       props.history.replace('/login')
@@ -54,7 +53,7 @@ let weConfig = (callback) => {
               timestamp:res.data.timestamp,
               nonceStr:res.data.nonceStr,
               signature:res.data.signature,
-              jsApiList:["checkJsApi","onMenuShareTimeline","onMenuShareAppMessage","onMenuShareQQ","onMenuShareWeibo","onMenuShareQZone","hideMenuItems","showMenuItems","hideAllNonBaseMenuItem","showAllNonBaseMenuItem","translateVoice","startRecord","stopRecord","onVoiceRecordEnd","playVoice","onVoicePlayEnd","pauseVoice","stopVoice","uploadVoice","downloadVoice","chooseImage","previewImage","uploadImage","downloadImage","getNetworkType","openLocation","getLocation","hideOptionMenu","showOptionMenu","closeWindow","scanQRCode","chooseWXPay","openProductSpecificView","addCard","chooseCard","openCard"]
+              jsApiList: ['checkJsApi', 'onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone','hideAllNonBaseMenuItem','showAllNonBaseMenuItem']
           })
           console.log('---callback---'+callback)
           callback();
@@ -138,11 +137,47 @@ let handleFrom = (key,value,ev) => {
       old && ev.setState({from:old});
     }
 }
+let loadJs = (srcs, func) => {
+  if (!$.isArray(srcs)) {
+    srcs = [srcs];
+  }
+  var length = srcs.length;
+  var oHead = document.getElementsByTagName('HEAD').item(0);
+  for (var i = 0; i < length; i++) {
+    var oScript = document.createElement("script");
+    oScript.type = "text/javascript";
+    var item = srcs[i];
+    oScript.src = item.src ? item.src : item;
+    if (item.func) {
+      oScript.onload = function() {
+        item.func();
+      }
+    }
+    oHead.appendChild(oScript);
+  }
+}
+let isWeixin5 = () => {
+  let sUserAgent = window.navigator.userAgent.toLowerCase();
+  if (sUserAgent.indexOf("micromessenger") >= 0) {
+    return true;
+  }
+  return false;
+}
+let isMobile = () => {
+  let sUserAgent = window.navigator.userAgent;
+  if (sUserAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone|MicroMessenger)/i)){
+    return true;
+  }
+  return false;
+}
 export default {
   search: locationSearch,
   queryStr: querySearch,
   login: login,
   weConfig:weConfig,
   share:share,
-  handleFrom:handleFrom
+  handleFrom:handleFrom,
+  loadJs:loadJs,
+  isWeixin5:isWeixin5,
+  isMobile:isMobile
 }

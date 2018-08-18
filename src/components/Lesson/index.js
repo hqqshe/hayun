@@ -48,7 +48,7 @@ class Lesson extends Component {
             if(res.code == '000000'){
                 this.setState({room:res.data.room});
                 let url = window.location.origin+window.location.pathname+window.location.hash+'&from='+this.props.Store.userInfo.id;
-                utils.share(res.data.room.title,url,res.data.room.photo,res.data.room.title);
+                utils.isWeixin5() && utils.share(res.data.room.title,url,res.data.room.photo,res.data.room.title);
             }
         });
     }
@@ -80,6 +80,7 @@ class Lesson extends Component {
     }
     //支付
     handleBuy = key => {
+        console.log('-----handleBuy-------'+this.state.from)
         //todo 检查登录
         if(this.props.Store.userInfo.sessionId == ''){
             utils.login(this.props);
@@ -87,8 +88,7 @@ class Lesson extends Component {
             this.setState({showQcode:true});
         }else{
             var evetype=1;
-            var ua = window.navigator.userAgent; 
-            if (ua.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone|MicroMessenger)/i)) {
+            if (utils.isMobile()) {
                 evetype=2;
                 if (ua.toLowerCase().match(/MicroMessenger/i) == 'micromessenger') {
                     evetype=3;  

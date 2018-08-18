@@ -1,46 +1,31 @@
 import React, { Component } from 'react';
 import Footer from '../Footer/Footer';
 import MenuSwitch from '../Menu/MenuSwitch';
-import {GET} from '../fetch';
+import {GET,POST} from '../fetch';
 import utils from '../utils';
 import { observer, inject } from 'mobx-react'
 import '../css/index.less'
 
 @inject('Store')
 @observer
-class Video extends Component {
+class Vip extends Component {
     constructor(props){
         super(props)
         this.state={
-            search:props.location.search,
             videoPkg:{},
             videos:[],
-            goodId:'',
-            s:8,
-            p:1,
-            more:'点击加载更多',
             from:null
         }
     }
     //获取视频数据
-    getVidoes = key => {
-        GET('/api/vidoes',{
-            s:this.state.s,
-            p:this.state.p,
-            goodsId:key
+    getVidoes = () => {
+        POST('/video/freeVideo',{
         }).then(res => {
             if(res.code == '000000'){
                 this.setState({
                     videoPkg:res.data.goods,
                     videos:this.state.videos.concat(res.data.videos)
 
-                },()=>{
-                //更新 加载更对按钮
-                if(this.state.s*this.state.p>=this.state.videoPkg.count){
-                    this.setState({more:'没有更多了'});
-                }else{
-                    this.setState({more:'点击加载更多'});
-                }
                 });   
                  //初始当前用户分享
                 let url = window.location.origin+window.location.pathname+window.location.hash+'&from='+this.props.Store.userInfo.id;
@@ -96,10 +81,7 @@ class Video extends Component {
     componentDidMount = () => {
         let from = utils.queryStr('from',this.state.search);
         let goodId = utils.queryStr('goodsId',this.state.search)
-        this.getVidoes(goodId)
-         //保存到localstore 或者 拿出对应cid的from
-        utils.handleFrom(goodId,from,this);
-        this.setState({goodId:goodId});
+        this.getVidoes()
     }
     //微信内支付 验证环境
     callPay = (code,goods) => {
@@ -133,17 +115,10 @@ class Video extends Component {
         if(videoId) redirect=redirect+'?videoId='+videoId;
         window.open(redirect);  
     }
-    //加载更多
-    handleMore = (e) => {
-        e.preventDefault();
-        //没有数据了
-        if(this.state.s*this.state.p<this.state.videoPkg.count){
-        this.setState({p:this.state.p+1},()=>{this.getVidoes(this.state.goodId)});
-        }
-    }
+    
     render() {
         const pkg=this.state.videoPkg;
-        console.log(this.state.videos)
+        //console.log(this.props.location)
         return (
             <div className='Layouts_wrap clear clearFix'>
                 <img style={{width:'100%'}} src={pkg.photo} alt={pkg.name}/>
@@ -156,7 +131,7 @@ class Video extends Component {
                 <div className='buy_wrap wrap_padding video'>
                 <div className="info ">
                    <p className="title">{pkg.name}</p>
-                   <p className="des"> 共:{pkg.count}个视频 | 年级:{pkg.grade} | 科目:{pkg.subName}</p>
+                   <p className="des">类型:{pkg.category} | 共:{pkg.count}个视频 | 年级:{pkg.grade} | 科目:{pkg.subName}</p>
                    <p className="des"></p>
                    <div className="price_info">
                        <span className="old rmb">{pkg.oldPrice/100}</span>
@@ -182,13 +157,13 @@ class Video extends Component {
                                     <div className='item_lesson clearfix'>
                                         <div className="info">
                                             <p className="title">{k.title}</p>
-                                            
-                                            {k.amount==0
+                                            <span className="sign">{k.category}</span>
+                                            {k.amountLong==0
                                                 ?<span className="sign free">免费</span>:''
                                             }
                                             
                                         </div>
-                                        {this.props.Store.userInfo.vip>new Date().getTime()||pkg.boughted||k.amount==0
+                                        {this.props.Store.userInfo.vip>new Date().getTime()||pkg.boughted||k.amountLong==0||k.boughted
                                             ?<div className="buy_info clearfix">
                                                 <a href="javascript:void(0);" className="buy_btn play" onClick={this.handlePlay.bind(this,pkg.id,k.goosId)}>播放</a>
                                             </div>
@@ -201,7 +176,7 @@ class Video extends Component {
                         </div>
                     </div>
                 </div>
-                <div className="more" onClick={this.handleMore.bind(this)}>{this.state.more}</div>
+                
                 <Footer />
                 <MenuSwitch />
             </div>
@@ -209,4 +184,4 @@ class Video extends Component {
     }
 }
 
-export default Video
+export default Vip

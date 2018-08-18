@@ -6,6 +6,7 @@ import FormBox from '../components/FormBox';
 import Wxlogin from '../components/Wxlogin';
 import logo from '../../assets/logo.png';
 import {GET,POST} from '../../fetch';
+import utils from '../../utils';
 import './index.less';
 
 const FormItem = Form.Item;
@@ -57,7 +58,7 @@ class Login extends Component {
     }
  
     handleShowWechat(){
-        if (this.props.Store.inwx) {
+        if (utils.isWeixin5()) {
             window.location.href =encodeURI('https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_base&state=1#wechat_redirect');
         }else{
             this.setState({showWechat:!this.state.showWechat});
@@ -82,7 +83,7 @@ class Login extends Component {
                 <div id='wx_wrap' className='wx_wrap' style={{display:this.state.showWechat?"block":"none"}}>
                     <div className="cover"></div>
                     <div className='frame'>
-                    {!this.props.Store.inwx?<Wxlogin/>:''}
+                    {!utils.isWeixin5()?<Wxlogin/>:''}
                     </div>
                 </div>
             </div>

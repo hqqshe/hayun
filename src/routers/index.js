@@ -12,6 +12,7 @@ import User from '../components/User';
 import UserInfo from '../components/UserInfo';
 import BindPhone from '../components/BindPhone';
 import Video from '../components/Video';
+import Vip from '../components/Vip';
 import {GET} from '../components/fetch';
 import utils from '../components/utils';
 import Cookies from 'js-cookie';
@@ -22,9 +23,18 @@ class Routers extends Component {
         super(props)
     }
     componentWillMount(){
-        //设置全局微信环境
-        if (navigator.userAgent.toLowerCase().indexOf('micromessenger') > -1 || typeof navigator.wxuserAgent !== 'undefined') {
-            store.updateInwx(true);
+        //如果是微信 则加载wxjssdk 设置全局微信环境
+        if (utils.isWeixin5()) {
+            util.loadJs([{
+                src: './dll/jweixin-1.2.0.js',
+                func:() => {
+                    utils.weConfig(()=>{
+                        wx.ready(function(){
+                            wx.hideAllNonBaseMenuItem()
+                        });
+                    });
+                }
+            }]);
         }
         //初始openid
         let code=utils.search('code');
@@ -38,12 +48,6 @@ class Routers extends Component {
         if(session){
             this.loginSession(session);
         }
-        utils.weConfig(()=>{
-            wx.ready(function(){
-                wx.hideAllNonBaseMenuItem()
-            });
-        });
-        
     }
     //根据code保存openid 到sessionStorage
     loginWx = key => {
@@ -66,11 +70,6 @@ class Routers extends Component {
                 store.updateName(res.data.account);
             }else{
                 Cookies.remove('hl_p_c_s_t');
-                // if (store.inwx) {
-                //     window.location.href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx60a9fa60ce58ce4c&redirect_uri=https%3a%2f%2fwww.hayun100.com%2fwechat%2findex.html&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
-                // }else{
-                //     this.props.history.replace('/login')
-                // }
             }
         });
     }
@@ -79,6 +78,7 @@ class Routers extends Component {
         return (
             <Provider Store={store}>
                 <Switch>
+                    <Route path="/vip" component={Vip}/>
                     <Route path="/video" component={Video}/>
                     <Route path="/bind" component={BindPhone}/>
                     <Route path="/info" component={UserInfo}/>
