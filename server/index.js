@@ -16,6 +16,7 @@ const wechatProxy = proxy('/wechat', { target: 'http://localhost:9999',changeOri
 const followProxy = proxy('/customer', { target: 'http://localhost:9999',changeOrigin: true });
 const smsProxy = proxy('/sms', { target: 'http://localhost:9999',changeOrigin: true });
 const videoProxy = proxy('/video', { target: 'http://localhost:9999',changeOrigin: true });
+const playerProxy = proxy('/player', { target: 'http://localhost:9999',changeOrigin: true });
 
 app.use(compress())
 
@@ -43,6 +44,7 @@ app.use('/wechat/*', wechatProxy);
 app.use('/customer/*', followProxy);
 app.use('/sms/*', smsProxy);
 app.use('/video/*', videoProxy);
+app.use('/player/*', playerProxy);
 app.use(hotMiddleware)
 app.use(express.static(project.basePath))
 

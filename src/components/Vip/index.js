@@ -3,8 +3,7 @@ import Footer from '../Footer/Footer';
 import MenuSwitch from '../Menu/MenuSwitch';
 import {GET,POST} from '../fetch';
 import utils from '../utils';
-import { observer, inject } from 'mobx-react'
-import '../css/index.less'
+import { observer, inject } from 'mobx-react';
 
 @inject('Store')
 @observer
@@ -12,9 +11,9 @@ class Vip extends Component {
     constructor(props){
         super(props)
         this.state={
-            videoPkg:{},
             videos:[],
-            from:null
+            from:null,
+            player:null
         }
     }
     //获取视频数据
@@ -23,8 +22,7 @@ class Vip extends Component {
         }).then(res => {
             if(res.code == '000000'){
                 this.setState({
-                    videoPkg:res.data.goods,
-                    videos:this.state.videos.concat(res.data.videos)
+                    videos:this.state.videos.concat(res.data.data)
 
                 });   
                  //初始当前用户分享
@@ -32,6 +30,44 @@ class Vip extends Component {
                 utils.isWeixin5() && utils.share(res.data.goods.name,url,res.data.goods.photo,res.data.goods.name);
             }
         });
+    }
+    //获取播放数据
+    getPlaySts = (goodsId) => {
+        if(this.state.player){
+            //
+            document.getElementById('J_prismPlayer').innerHTML='';
+            this.setState({player:null})
+            this.state.player.dispose(); //销毁
+		}
+        POST('/player/sts',{'goodsId':goodsId}
+        ).then(res => {
+            if(res.code == '000000'){
+                let data = res.data;
+				this.initPlayer(data.vid,data.accessKeyId,data.securityToken,data.accessKeySecret);
+            }
+        });
+    }
+    //初始化播放器
+    initPlayer = (vid,accessKeyId,securityToken,accessKeySecret) => {
+        let that=this;
+        new Aliplayer(
+            {
+              id: 'J_prismPlayer',
+              width: '100%',
+              autoplay: true,
+              vid : vid,
+              accessKeyId: accessKeyId,
+              securityToken: securityToken,
+              accessKeySecret: accessKeySecret,
+              useH5Prism:true,
+              controlBarVisibility: "hover"
+             },
+             function(p){
+                that.setState({
+                    player:p
+                 })
+            }
+         );
     }
     //支付
     handleBuy = key => {
@@ -82,6 +118,12 @@ class Vip extends Component {
         let from = utils.queryStr('from',this.state.search);
         let goodId = utils.queryStr('goodsId',this.state.search)
         this.getVidoes()
+        utils.loadJs([{
+            src: 'https://g.alicdn.com/de/prismplayer/2.7.2/aliplayer-min.js',
+            func:() => {
+                
+            }
+        }]);
     }
     //微信内支付 验证环境
     callPay = (code,goods) => {
@@ -117,34 +159,8 @@ class Vip extends Component {
     }
     
     render() {
-        const pkg=this.state.videoPkg;
-        //console.log(this.props.location)
         return (
             <div className='Layouts_wrap clear clearFix'>
-                <img style={{width:'100%'}} src={pkg.photo} alt={pkg.name}/>
-                {/* <div className='share_btn'>
-                    <Link to={{
-                    pathname: '/share',
-                    search: '?lid='+this.state.lct.id+'&cid='+this.state.room.id
-                    }}></Link>
-                 </div> */}
-                <div className='buy_wrap wrap_padding video'>
-                <div className="info ">
-                   <p className="title">{pkg.name}</p>
-                   <p className="des">类型:{pkg.category} | 共:{pkg.count}个视频 | 年级:{pkg.grade} | 科目:{pkg.subName}</p>
-                   <p className="des"></p>
-                   <div className="price_info">
-                       <span className="old rmb">{pkg.oldPrice/100}</span>
-                       <span className="rmb">{pkg.newPrice/100}</span>
-                    </div>
-                </div>
-                <div className='buy'>
-                {this.props.Store.userInfo.vip>new Date().getTime()||pkg.boughted
-                    ?<a href="javascript:void(0);" className="buy_btn play" onClick={this.handlePlay.bind(this,pkg.id)}>立即学习</a>
-                    :<a href="javascript:void(0);" className="buy_btn" onClick={this.handleBuy.bind(this,pkg.id)}>立即购买</a>
-                }
-                </div>
-            </div>
                 <div className='tab_wrap' >
                     <div className='item active'>视频列表</div>
                 </div>
@@ -155,7 +171,7 @@ class Vip extends Component {
                             this.state.videos.map((k) => {
                                 return (
                                     <div className='item_lesson clearfix'>
-                                        <div className="info">
+                                        <div className="info" onClick={this.getPlaySts.bind(this,k.goosId)}>
                                             <p className="title">{k.title}</p>
                                             <span className="sign">{k.category}</span>
                                             {k.amountLong==0
@@ -163,12 +179,6 @@ class Vip extends Component {
                                             }
                                             
                                         </div>
-                                        {this.props.Store.userInfo.vip>new Date().getTime()||pkg.boughted||k.amountLong==0||k.boughted
-                                            ?<div className="buy_info clearfix">
-                                                <a href="javascript:void(0);" className="buy_btn play" onClick={this.handlePlay.bind(this,pkg.id,k.goosId)}>播放</a>
-                                            </div>
-                                            :''
-                                        }
                                     </div>
                                 )
                             })
@@ -176,7 +186,7 @@ class Vip extends Component {
                         </div>
                     </div>
                 </div>
-                
+                <div class="prism-player" id="J_prismPlayer"></div>
                 <Footer />
                 <MenuSwitch />
             </div>

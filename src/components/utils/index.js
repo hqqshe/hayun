@@ -138,12 +138,12 @@ let handleFrom = (key,value,ev) => {
     }
 }
 let loadJs = (srcs, func) => {
-  if (!$.isArray(srcs)) {
+  if (!Array.isArray(srcs)) {
     srcs = [srcs];
   }
   var length = srcs.length;
-  var oHead = document.getElementsByTagName('HEAD').item(0);
-  for (var i = 0; i < length; i++) {
+  var oHead = document.getElementsByTagName('head')[0];
+  for (var i = 0; i < srcs.length; i++) {
     var oScript = document.createElement("script");
     oScript.type = "text/javascript";
     var item = srcs[i];
