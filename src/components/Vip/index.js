@@ -4,6 +4,8 @@ import MenuSwitch from '../Menu/MenuSwitch';
 import {GET,POST} from '../fetch';
 import utils from '../utils';
 import { observer, inject } from 'mobx-react';
+import ad from '../assets/ad.png';
+import '../css/vip.less';
 
 @inject('Store')
 @observer
@@ -34,10 +36,8 @@ class Vip extends Component {
     //获取播放数据
     getPlaySts = (goodsId) => {
         if(this.state.player){
-            //
             document.getElementById('J_prismPlayer').innerHTML='';
             this.setState({player:null})
-            this.state.player.dispose(); //销毁
 		}
         POST('/player/sts',{'goodsId':goodsId}
         ).then(res => {
@@ -157,27 +157,29 @@ class Vip extends Component {
         if(videoId) redirect=redirect+'?videoId='+videoId;
         window.open(redirect);  
     }
-    
+    covertImg = (url) =>{
+        let parms = url.split('dfkt/')
+        return (parms.length === 2 ? parms[0] + 'dfkt/' + encodeURI(parms[1]):parms[0]).replace('+','%2B');
+    }
+
     render() {
         return (
-            <div className='Layouts_wrap clear clearFix'>
-                <div className='tab_wrap' >
-                    <div className='item active'>视频列表</div>
+            <div className='Layouts_wrap contaner'>
+                <div className="ad_wrap">
+                    <img src={ad} alt=""/>
                 </div>
-                <div className="wrap_padding">
+                <div className='item_title'>试看视频</div>
+                <div className="">
                     <div>
-                        <div className="class clearfix">
+                        <div className="video_wrap clearfix">
                         {
                             this.state.videos.map((k) => {
                                 return (
-                                    <div className='item_lesson clearfix'>
-                                        <div className="info" onClick={this.getPlaySts.bind(this,k.goosId)}>
-                                            <p className="title">{k.title}</p>
-                                            <span className="sign">{k.category}</span>
-                                            {k.amountLong==0
-                                                ?<span className="sign free">免费</span>:''
-                                            }
-                                            
+                                    <div class="videoItem" onClick={this.getPlaySts.bind(this,k.goosId)}>
+                                        <div class="inner">
+                                            <div class="video"> <img src={this.covertImg(k.coverURL)} /></div>
+                                            <p class="title">{k.title}</p>
+                                            <p class="tip">{k.category} | {k.grade} | {k.subjectName}</p>
                                         </div>
                                     </div>
                                 )

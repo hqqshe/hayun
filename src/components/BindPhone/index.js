@@ -14,7 +14,8 @@ class BindPhone extends Component{
         super(props,context);
         this.state={
             loading:false,
-            timer:0,
+            timer:60,
+            discodeBtn: false,
             phone:'',
             search:props.location.search?props.location.search.split('=')[1]:null,
         }
@@ -23,16 +24,33 @@ class BindPhone extends Component{
      * 发短信
      */
     sendMsg = () => {
+        if(this.state.discodeBtn) return;
         this.props.form.validateFields(['phone'],(err, values) => {
           if (!err) {
             GET('/sms/bind/'+values.phone,{
             }).then(res => {
-                console.log(res)
+                this.count();
             });
           }
         });
     }
-
+    //倒计时
+    count = () => {
+        let siv = setInterval(() => {
+            this.setState({ 
+                timer: --this.state.timer,
+                discodeBtn: true
+            },() => {
+                if (this.state.timer === 0) {
+                    clearInterval(siv);
+                    this.setState({
+                        timer:60,
+                        discodeBtn: false
+                    })
+                }
+            });
+        }, 1000);
+        }
     /**
      * 绑定
      */
@@ -79,7 +97,7 @@ class BindPhone extends Component{
                                 <Search
                                     placeholder="输入验证码"
                                     onSearch={this.sendMsg.bind(this)}
-                                    enterButton={this.state.timer==0?'获取验证码':this.state.timer+'秒后再次获取'}
+                                    enterButton={this.state.timer==60?'获取验证码':this.state.timer+'s'}
                                     autocomplete="off"
                                 />
                             )}
