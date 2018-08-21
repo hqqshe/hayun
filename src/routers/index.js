@@ -25,7 +25,7 @@ class Routers extends Component {
     componentWillMount(){
         //如果是微信 则加载wxjssdk 设置全局微信环境
         if (utils.isWeixin5()) {
-            util.loadJs([{
+            utils.loadJs([{
                 src: './dll/jweixin-1.2.0.js',
                 func:() => {
                     utils.weConfig(()=>{
