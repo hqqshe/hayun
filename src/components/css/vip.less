@@ -4,6 +4,7 @@
 .ad_wrap{
     img{width: 100%;}
 }
+.video_con{overflow: hidden;}
 .item_title{
     text-align: center;
     font-size: 20px;
@@ -49,5 +50,165 @@
                 color:#999;
             }
         }
+    }
+}
+.playerback{
+	background: #292929;
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    z-index: 9999;
+    .back{
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 60px;
+        height: 30px;
+        background: #21c5e0;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+    }
+    .prism-player{
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        height: 500px;
+        margin: auto;
+        position: absolute;
+    }
+}
+.item_tip{
+
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #f2bd5e;
+    padding: 20px 0;
+    &::before{
+        content: "";
+        border-width: 5px 0 5px 8px;
+        border-style: solid;
+        border-color: transparent transparent transparent #f2bd5e;
+        float: left;
+        margin: 3px 5px 0 10px;
+    }
+}
+.specil{
+    background: #fff;
+    padding: 0.8rem;
+    .item{
+        border: 1px solid #f2bd5e;
+        padding: 10px;
+        .title{
+            text-align: center;
+            margin-bottom: 10px;
+            color: #f2bd5e;
+        }
+        ul{
+            float: left;
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            &:last-child{
+                float: right;
+            }
+            li::before {
+                content: "●";
+                color: rgb(238, 96, 56);
+                margin-right: 10px;
+            }
+        }
+        .user{
+            img{
+                border-radius: 100%;
+                width: 50px;
+                float: left;
+                margin-right: 20px;
+            }
+            .info{
+                float: left;
+                line-height: 25px;
+            }
+        }
+    }
+}
+.choseb{
+    .item{
+        float: left;
+        width: 33.3333333%;
+        padding: 5px;
+        .inner{
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 5px;
+            font-size: 0.8rem;
+            margin: 0 auto;
+            text-align: center;
+            line-height: 1.5rem;
+            position: relative;
+            .icon{
+                background-image: url(../assets/vipse.png) ;
+                background-repeat: no-repeat;
+                background-size: contain;
+                height: 0;
+                padding-bottom: 80%;
+            }
+            .old{
+                text-decoration: line-through;
+                color: #999;
+            }
+            .price{
+                margin-bottom: 10px;
+                span{
+                    color:#ff6840;
+                    font-size: 1.5rem;
+                    
+                }
+            }
+            &::after{
+                content: "";
+                background-image: url(../assets/vipse_icon.png) ;
+                background-repeat: no-repeat;
+                background-size: contain;
+                width: 30px;
+                height: 30px;
+                position: absolute;
+                left: 0;
+                right: 0;
+                margin: auto;
+                bottom: -15px;
+            }
+        }
+        &.active{
+            .inner{
+                .icon{
+                    background-image: url(../assets/vips.png)
+                }
+                &::after{
+                    background-image: url(../assets/vips_icon.png) ;
+                }
+            }
+        }
+    }
+}
+.buy_con{
+    padding: 40px 40px 0;
+    text-align: center;
+    .buy{
+        padding: 10px 40px;
+        color: #fff;
+        border-radius: 30px;
+        background: -webkit-linear-gradient(right,#ff4340, #ff6a40);
+        background: -o-linear-gradient(right,#ff4340, #ff6a40);
+        background: -moz-linear-gradient(right,#ff4340, #ff6a40);
+        background: linear-gradient(right,#ff4340, #ff6a40);
+    
+    }
+    p{
+        font-size: 0.9rem;
+        color: #999;
+        padding: 10px 0;
     }
 }

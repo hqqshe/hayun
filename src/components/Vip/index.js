@@ -15,7 +15,8 @@ class Vip extends Component {
         this.state={
             videos:[],
             from:null,
-            player:null
+            player:null,
+            current:29,
         }
     }
     //获取视频数据
@@ -25,25 +26,20 @@ class Vip extends Component {
             if(res.code == '000000'){
                 this.setState({
                     videos:this.state.videos.concat(res.data.data)
-
                 });   
-                 //初始当前用户分享
-                let url = window.location.origin+window.location.pathname+window.location.hash+'&from='+this.props.Store.userInfo.id;
-                utils.isWeixin5() && utils.share(res.data.goods.name,url,res.data.goods.photo,res.data.goods.name);
+                 
             }
         });
     }
     //获取播放数据
     getPlaySts = (goodsId) => {
-        if(this.state.player){
-            document.getElementById('J_prismPlayer').innerHTML='';
-            this.setState({player:null})
-		}
+        this.closePlayer()
         POST('/player/sts',{'goodsId':goodsId}
         ).then(res => {
             if(res.code == '000000'){
                 let data = res.data;
-				this.initPlayer(data.vid,data.accessKeyId,data.securityToken,data.accessKeySecret);
+                this.initPlayer(data.vid,data.accessKeyId,data.securityToken,data.accessKeySecret);
+                this.setState({showPlayer:'block'})
             }
         });
     }
@@ -54,6 +50,7 @@ class Vip extends Component {
             {
               id: 'J_prismPlayer',
               width: '100%',
+              height:'500',
               autoplay: true,
               vid : vid,
               accessKeyId: accessKeyId,
@@ -124,6 +121,12 @@ class Vip extends Component {
                 
             }
         }]);
+        //初始当前用户分享
+        if(utils.isWeixin5()){
+            let url = window.location.origin+window.location.pathname+window.location.hash;
+            if(this.props.Store.userInfo) url = window.location.origin+window.location.pathname+window.location.hash+'&from='+this.props.Store.userInfo.id;
+            utils.share('哈云会员限时推广',url,'https://www.hayun100.com/wechat/images/d031ec2d9f5a7d758453f500f2ad2a0b.png','教材同步·知识点精讲·基础课·提高课,覆盖小学一年级至高三的全部科目');
+        }
     }
     //微信内支付 验证环境
     callPay = (code,goods) => {
@@ -161,7 +164,38 @@ class Vip extends Component {
         let parms = url.split('dfkt/')
         return (parms.length === 2 ? parms[0] + 'dfkt/' + encodeURI(parms[1]):parms[0]).replace('+','%2B');
     }
-
+    preventBackgroundScroll = (e: React.WheelEvent<HTMLDivElement>) => {
+        const target = e.currentTarget
+        if (
+          (e.deltaY < 0 && target.scrollTop <= 0) ||
+          (e.deltaY > 0 && target.scrollHeight - target.clientHeight - target.scrollTop <= 0)
+        ) {
+          e.stopPropagation()
+          e.preventDefault()
+        }
+    }
+    //关闭播放器 非常的蛋疼,dispose会清除容器,让我不得不操作dom 手动把容器添加回去
+    closePlayer = () =>{
+        if(this.state.player){
+            this.state.player.dispose();
+            let con = document.getElementById('J_prismPlayer');
+            if(!con){
+                let div = document.createElement("div");
+                div.setAttribute("id", "J_prismPlayer");
+                div.setAttribute("class", "prism-player");
+                document.getElementById('playerback').appendChild(div); 
+            }else{
+                con.innerHTML='';
+            }
+            this.setState({player:null})
+		}
+        this.setState({showPlayer:'none'})
+    }
+    choseItem = (key) => {
+        this.setState({current:key})
+        
+        console.log(key)
+    }
     render() {
         return (
             <div className='Layouts_wrap contaner'>
@@ -169,28 +203,94 @@ class Vip extends Component {
                     <img src={ad} alt=""/>
                 </div>
                 <div className='item_title'>试看视频</div>
-                <div className="">
-                    <div>
-                        <div className="video_wrap clearfix">
-                        {
-                            this.state.videos.map((k) => {
-                                return (
-                                    <div class="videoItem" onClick={this.getPlaySts.bind(this,k.goosId)}>
-                                        <div class="inner">
-                                            <div class="video"> <img src={this.covertImg(k.coverURL)} /></div>
-                                            <p class="title">{k.title}</p>
-                                            <p class="tip">{k.category} | {k.grade} | {k.subjectName}</p>
-                                        </div>
+                <div className="video_con">
+                    <div className="video_wrap clearfix">
+                    {
+                        this.state.videos.map((k) => {
+                            return (
+                                <div class="videoItem" onClick={this.getPlaySts.bind(this,k.goosId)}>
+                                    <div class="inner">
+                                        <div class="video"> <img src={this.covertImg(k.coverURL)} /></div>
+                                        <p class="title">{k.title}</p>
+                                        <p class="tip">同步辅导 | {k.grade} | {k.subjectName}</p>
                                     </div>
-                                )
-                            })
-                        }
+                                </div>
+                            )
+                        })
+                    }
+                    </div>
+                </div>
+                <div className='item_title'>会员购买</div>
+                <div className="item_con">
+                    <div className="specil">
+                        <div className="item clearfix">
+                            <div className="title">VIP尊享特权</div>
+                            <ul className="">
+                                <li>独播名师直播课</li>
+                                <li>高清1080p播放</li>
+                                <li>心理辅导课学习</li>
+                            </ul>
+                            <ul className="clearfix">
+                                <li>各学科学习评测</li>
+                                <li>全广告免除特权</li>
+                                <li>全程1对1学习咨询</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-                <div class="prism-player" id="J_prismPlayer"></div>
-                <Footer />
-                <MenuSwitch />
+                <div className='item_tip'>个人信息</div>
+                <div className="item_con">
+                    <div className="specil">
+                        <div className="item clearfix">
+                            <div className="user">
+                                <img src="http://3wedu.oss-cn-shenzhen.aliyuncs.com/uploads/859/sethead/userhead/859_31019_1516279209784.png" alt=""/>
+                                <div className="info">
+                                    用户名：吴老师<br/>
+                                    会员有效期至：2018-08-25
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className='item_tip'>成为会员</div>
+                <div className="item_con">
+                    <div className="choseb clearfix">
+                        <div className={this.state.current === 156 ? 'item active' : 'item'} onClick={this.choseItem.bind(this,156)}>
+                            <div className="inner">
+                                <div className='icon'></div>
+                                <p className="old">原价：594/半年</p>
+                                <p className="tip">限时包月立减70%</p>
+                                <p className="price"><span>¥156</span>/半年</p>
+                            </div>
+                        </div>
+                        <div className={this.state.current === 29 ? 'item active' : 'item'} onClick={this.choseItem.bind(this,29)}>
+                            <div className="inner">
+                                <div className='icon'></div>
+                                <p className="old">原价：99/月</p>
+                                <p className="tip">限时包月立减70%</p>
+                                <p className="price"><span>¥29</span>/月</p>
+                            </div>
+                        </div>
+                        <div className={this.state.current === 278 ? 'item active' : 'item'} onClick={this.choseItem.bind(this,278)}>
+                            <div className="inner">
+                                <div className='icon'></div>
+                                <p className="old">原价：1188/年</p>
+                                <p className="tip">限时包月立减70%</p>
+                                <p className="price"><span>¥278</span>/年</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="buy_con">
+                    <div className="buy"> 立即购买 </div>
+                    <p>成都哈云科技有限公司</p>
+                </div>
+                <div id='playerback' class="playerback" onWheel = {this.preventBackgroundScroll} style={{display:this.state.showPlayer}}>
+                    <button class="back" onClick={this.closePlayer}>返回</button>
+                    <div class="prism-player" id="J_prismPlayer"></div>
+                </div>
+                {/* <Footer />
+                <MenuSwitch /> */}
             </div>
         )
     }
