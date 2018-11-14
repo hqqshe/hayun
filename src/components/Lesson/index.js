@@ -90,7 +90,7 @@ class Lesson extends Component {
             var evetype=1;
             if (utils.isMobile()) {
                 evetype=2;
-                if (ua.toLowerCase().match(/MicroMessenger/i) == 'micromessenger') {
+                if (utils.isWeixin5()) {
                     evetype=3;  
                 }
             }

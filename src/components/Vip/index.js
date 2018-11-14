@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Footer from '../Footer/Footer';
 import MenuSwitch from '../Menu/MenuSwitch';
+import QRCode from 'qrcode.react';
 import {GET,POST} from '../fetch';
 import utils from '../utils';
 import { observer, inject } from 'mobx-react';
@@ -17,6 +18,8 @@ class Vip extends Component {
             from:null,
             player:null,
             current:29,
+            buyQcode:'',
+            showQcode:true
         }
     }
     //获取视频数据
@@ -71,8 +74,6 @@ class Vip extends Component {
         //todo 检查登录
         if(this.props.Store.userInfo.sessionId == ''){
             utils.login(this.props);
-        }else if(this.state.buyQcode){
-            this.setState({showQcode:true});
         }else{
             var evetype=1;
             if (utils.isMobile()) {
@@ -84,9 +85,9 @@ class Vip extends Component {
             let goods=[];
             goods.push(key);
             GET('/wechat/pay',{
-                goodIds:JSON.stringify(goods),
+                amount:this.state.current,
                 type:evetype,
-                goodtype:1,
+                goodtype:2,
                 from:this.state.from
             }).then(res => {
                 if(res.code == '000000'){
@@ -191,11 +192,16 @@ class Vip extends Component {
 		}
         this.setState({showPlayer:'none'})
     }
-    choseItem = (key) => {
+    chooseItem = (key) => {
         this.setState({current:key})
-        
-        console.log(key)
     }
+    getVipExpire = () => {
+        if(this.props.Store.userInfo.vip){
+            return utils.dateFormat(new Date(this.props.Store.userInfo.vip),"yyyy-MM-dd")
+        }
+        return '';
+    }
+    
     render() {
         return (
             <div className='Layouts_wrap contaner'>
@@ -245,8 +251,8 @@ class Vip extends Component {
                             <div className="user">
                                 <img src="http://3wedu.oss-cn-shenzhen.aliyuncs.com/uploads/859/sethead/userhead/859_31019_1516279209784.png" alt=""/>
                                 <div className="info">
-                                    用户名：吴老师<br/>
-                                    会员有效期至：2018-08-25
+                                    用户名：{this.props.Store.userInfo.name}<br/>
+                                    会员有效期至：{this.getVipExpire()}
                                 </div>
                             </div>
                         </div>
@@ -255,7 +261,7 @@ class Vip extends Component {
                 <div className='item_tip'>成为会员</div>
                 <div className="item_con">
                     <div className="choseb clearfix">
-                        <div className={this.state.current === 156 ? 'item active' : 'item'} onClick={this.choseItem.bind(this,156)}>
+                        <div className={this.state.current === 156 ? 'item active' : 'item'} onClick={this.chooseItem.bind(this,156)}>
                             <div className="inner">
                                 <div className='icon'></div>
                                 <p className="old">原价：594/半年</p>
@@ -263,7 +269,7 @@ class Vip extends Component {
                                 <p className="price"><span>¥156</span>/半年</p>
                             </div>
                         </div>
-                        <div className={this.state.current === 29 ? 'item active' : 'item'} onClick={this.choseItem.bind(this,29)}>
+                        <div className={this.state.current === 29 ? 'item active' : 'item'} onClick={this.chooseItem.bind(this,29)}>
                             <div className="inner">
                                 <div className='icon'></div>
                                 <p className="old">原价：99/月</p>
@@ -271,7 +277,7 @@ class Vip extends Component {
                                 <p className="price"><span>¥29</span>/月</p>
                             </div>
                         </div>
-                        <div className={this.state.current === 278 ? 'item active' : 'item'} onClick={this.choseItem.bind(this,278)}>
+                        <div className={this.state.current === 278 ? 'item active' : 'item'} onClick={this.chooseItem.bind(this,278)}>
                             <div className="inner">
                                 <div className='icon'></div>
                                 <p className="old">原价：1188/年</p>
@@ -282,13 +288,35 @@ class Vip extends Component {
                     </div>
                 </div>
                 <div className="buy_con">
-                    <div className="buy"> 立即购买 </div>
+                    <div className="buy" onClick={this.handleBuy}> 立即购买 </div>
                     <p>成都哈云科技有限公司</p>
                 </div>
                 <div id='playerback' class="playerback" onWheel = {this.preventBackgroundScroll} style={{display:this.state.showPlayer}}>
                     <button class="back" onClick={this.closePlayer}>返回</button>
                     <div class="prism-player" id="J_prismPlayer"></div>
                 </div>
+                {/* {this.state.buyQcode && this.state.showQcode
+                    ?<div className="buy_qcode">
+                        <a class="cover" href="javascript:void(0);" onClick={this.hideQcode}></a>
+                        <div className="qcode">
+                        <p class="qrcode-title">使用微信扫码支付</p>
+                            <QRCode renderAs='svg' value={this.state.buyQcode} size='200'/>
+                            <p class="qrcode-tip">扫描二维码，识别图中二维码</p>
+                        </div>
+                    </div>
+                    :''
+                } */}
+                {utils.isWeixin5()
+                    ?''
+                    :<div className="buy_qcode">
+                        <a class="cover" href="javascript:void(0);" onClick={this.hideQcode}></a>
+                        <div className="qcode">
+                        <p class="qrcode-title">请使用微信扫一扫</p>
+                            <QRCode renderAs='canvas' value={window.location.href} size={200} />
+                            <p class="qrcode-tip">或者保存二维码,用微信扫一扫打开</p>
+                        </div>
+                    </div>
+                }
                 {/* <Footer />
                 <MenuSwitch /> */}
             </div>
